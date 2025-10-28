@@ -5,6 +5,20 @@ import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
+  const [apiStatus, setApiStatus] = useState<string>('')
+
+  const testApi = () => {
+    try {
+      if (window.api) {
+        setApiStatus('✅ window.api is available')
+        console.log('Available API methods:', Object.keys(window.api))
+      } else {
+        setApiStatus('❌ window.api is not available')
+      }
+    } catch (error) {
+      setApiStatus(`❌ Error: ${error}`)
+    }
+  }
 
   return (
     <>
@@ -16,11 +30,15 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
+      <h1>ClipForge - Electron Setup Test</h1>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
+        <button onClick={testApi} style={{ marginLeft: '10px' }}>
+          Test IPC Bridge
+        </button>
+        <p>{apiStatus}</p>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>

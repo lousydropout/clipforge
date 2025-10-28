@@ -1,24 +1,24 @@
 import { ipcRenderer, contextBridge } from 'electron'
 
-// --------- Expose some API to the Renderer process ---------
-contextBridge.exposeInMainWorld('ipcRenderer', {
-  on(...args: Parameters<typeof ipcRenderer.on>) {
-    const [channel, listener] = args
-    return ipcRenderer.on(channel, (event, ...args) => listener(event, ...args))
+// --------- Expose secure API to the Renderer process ---------
+contextBridge.exposeInMainWorld('api', {
+  invoke: (channel: string, args?: any) => {
+    const validChannels = ['video.import', 'video.clip', 'video.export']
+    if (validChannels.includes(channel)) {
+      return ipcRenderer.invoke(channel, args)
+    }
+    throw new Error(`Invalid IPC channel: ${channel}`)
   },
-  off(...args: Parameters<typeof ipcRenderer.off>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.off(channel, ...omit)
+  on: (channel: string, callback: Function) => {
+    const validChannels = ['ffmpeg.progress']
+    if (validChannels.includes(channel)) {
+      ipcRenderer.on(channel, (_, data) => callback(data))
+    }
   },
-  send(...args: Parameters<typeof ipcRenderer.send>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.send(channel, ...omit)
-  },
-  invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.invoke(channel, ...omit)
-  },
-
-  // You can expose other APTs you need here.
-  // ...
+  off: (channel: string, callback: Function) => {
+    const validChannels = ['ffmpeg.progress']
+    if (validChannels.includes(channel)) {
+      ipcRenderer.off(channel, callback)
+    }
+  }
 })

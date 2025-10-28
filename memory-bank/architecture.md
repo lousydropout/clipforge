@@ -59,6 +59,46 @@ clipforge-electron/
 | `video.export`    | Renderer → Main | Export trimmed video to selected location |
 | `ffmpeg.progress` | Main → Renderer | Stream progress updates during processing |
 
+## Implemented IPC Bridge
+
+The secure IPC bridge is implemented in `electron/preload.ts`:
+
+```typescript
+contextBridge.exposeInMainWorld("api", {
+  invoke: (channel: string, args?: any) => {
+    const validChannels = ["video.import", "video.clip", "video.export"];
+    if (validChannels.includes(channel)) {
+      return ipcRenderer.invoke(channel, args);
+    }
+    throw new Error(`Invalid IPC channel: ${channel}`);
+  },
+  on: (channel: string, callback: Function) => {
+    const validChannels = ["ffmpeg.progress"];
+    if (validChannels.includes(channel)) {
+      ipcRenderer.on(channel, (_, data) => callback(data));
+    }
+  },
+  off: (channel: string, callback: Function) => {
+    const validChannels = ["ffmpeg.progress"];
+    if (validChannels.includes(channel)) {
+      ipcRenderer.off(channel, callback);
+    }
+  },
+});
+```
+
+### TypeScript Interface
+
+```typescript
+interface Window {
+  api: {
+    invoke: (channel: string, args?: any) => Promise<any>;
+    on: (channel: string, callback: Function) => void;
+    off: (channel: string, callback: Function) => void;
+  };
+}
+```
+
 ## State Management (Zustand)
 
 Key state properties:
@@ -71,7 +111,10 @@ Key state properties:
 
 ## Security Considerations
 
-- Context isolation enabled
-- Preload script provides secure IPC bridge
-- No direct Node.js access from renderer process
-- File operations restricted to user-selected paths
+- ✅ Context isolation enabled (`contextIsolation: true`)
+- ✅ Node integration disabled (`nodeIntegration: false`)
+- ✅ Remote module disabled (`enableRemoteModule: false`)
+- ✅ Preload script provides secure IPC bridge with channel whitelist
+- ✅ No direct Node.js access from renderer process
+- ✅ File operations restricted to user-selected paths
+- ✅ Type-safe API interface prevents runtime errors
