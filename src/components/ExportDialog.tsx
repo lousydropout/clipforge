@@ -3,7 +3,8 @@ import { ipcClient } from "../services/ipcClient";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { toast } from "sonner";
 
 export function ExportDialog() {
   const {
@@ -11,6 +12,7 @@ export function ExportDialog() {
     videoMetadata,
     startTime,
     endTime,
+    outputResolutionPercent,
     isProcessing,
     progress,
     setProcessing,
@@ -25,25 +27,36 @@ export function ExportDialog() {
   // Listen to FFmpeg progress updates
   useEffect(() => {
     const handleProgress = (progressData: any) => {
+      console.log("Received progress update in renderer:", progressData);
       setProgress(progressData.progress || 0);
     };
 
     if (isProcessing) {
+      console.log("Setting up progress listener");
       ipcClient.onProgress(handleProgress);
     }
 
     return () => {
+      console.log("Cleaning up progress listener");
       ipcClient.offProgress(handleProgress);
     };
   }, [isProcessing, setProgress]);
 
-  const canExport =
-    videoPath &&
-    videoMetadata &&
-    startTime < endTime &&
-    endTime <= videoMetadata.duration;
+  const canExport = useMemo(
+    () =>
+      videoPath &&
+      videoMetadata &&
+      startTime < endTime &&
+      endTime <= videoMetadata.duration,
+    [videoPath, videoMetadata, startTime, endTime]
+  );
 
-  const handleExport = async () => {
+  const scaleToHeight = useMemo(() => {
+    if (!videoMetadata || outputResolutionPercent === 100) return undefined;
+    return Math.round(videoMetadata.height * (outputResolutionPercent / 100));
+  }, [videoMetadata, outputResolutionPercent]);
+
+  const handleExport = useCallback(async () => {
     if (!videoPath || !videoMetadata) return;
 
     setProcessing(true);
@@ -62,17 +75,30 @@ export function ExportDialog() {
       if (result.success) {
         setExportStatus("success");
         setProgress(100);
+        toast.success("Video exported successfully!");
       } else {
         setExportStatus("error");
-        setErrorMessage(result.error || "Export failed");
+        const errorMsg = result.error || "Export failed";
+        setErrorMessage(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (error) {
       setExportStatus("error");
-      setErrorMessage(error instanceof Error ? error.message : "Unknown error");
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      setErrorMessage(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setProcessing(false);
     }
-  };
+  }, [
+    videoPath,
+    videoMetadata,
+    startTime,
+    endTime,
+    scaleToHeight,
+    setProcessing,
+    setProgress,
+  ]);
 
   const handleReset = () => {
     setExportStatus("idle");
@@ -94,18 +120,34 @@ export function ExportDialog() {
         <div className="text-sm text-muted-foreground">
           <p>Duration: {formatTime(endTime - startTime)}</p>
           <p>
-            Resolution: {videoMetadata?.width} × {videoMetadata?.height}
+            Resolution:{" "}
+            {outputResolutionPercent === 100
+              ? `${videoMetadata?.width} × ${videoMetadata?.height}`
+              : `${Math.round(
+                  (videoMetadata?.width || 0) * (outputResolutionPercent / 100)
+                )} × ${Math.round(
+                  (videoMetadata?.height || 0) * (outputResolutionPercent / 100)
+                )} (${outputResolutionPercent}%)`}
           </p>
         </div>
 
         {/* Progress bar */}
         {isProcessing && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex justify-between text-sm">
               <span>Exporting...</span>
               <span>{Math.round(progress)}%</span>
             </div>
             <Progress value={progress} className="w-full" />
+
+            {/* Progress information */}
+            <div className="text-xs text-muted-foreground">
+              <div>
+                <span className="font-medium">Progress:</span>{" "}
+                {Math.round(progress)}% of {formatTime(endTime - startTime)}{" "}
+                trimmed video
+              </div>
+            </div>
           </div>
         )}
 
@@ -132,6 +174,8 @@ export function ExportDialog() {
             onClick={handleExport}
             disabled={!canExport || isProcessing}
             className="flex-1"
+            data-export-button
+            aria-label={isProcessing ? "Exporting video..." : "Export video"}
           >
             {isProcessing ? "Exporting..." : "Export Video"}
           </Button>

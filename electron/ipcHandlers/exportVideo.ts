@@ -2,6 +2,7 @@ import { dialog } from "electron";
 import { handleClipVideo } from "./clipVideo";
 import { ExportVideoRequest, FFmpegResult } from "../types";
 import path from "path";
+import { statSync } from "fs";
 
 export async function handleExportVideo(
   params: ExportVideoRequest
@@ -49,6 +50,41 @@ export async function handleExportVideo(
 
     const outputPath = result.filePath;
 
+    // Check if input file still exists
+    try {
+      statSync(inputPath);
+    } catch (error) {
+      return {
+        success: false,
+        error: "Input video file not found. Please re-import the video.",
+      };
+    }
+
+    // Check available disk space (basic check)
+    try {
+      const outputDir = path.dirname(outputPath);
+      const stats = statSync(outputDir);
+      if (!stats.isDirectory()) {
+        return {
+          success: false,
+          error: "Output directory is not valid",
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: "Cannot access output directory. Please check permissions.",
+      };
+    }
+
+    console.log("Calling handleClipVideo with params:", {
+      inputPath,
+      outputPath,
+      startTime,
+      endTime,
+      scaleToHeight,
+    });
+
     // Call clipVideo handler with the selected output path
     const clipResult = await handleClipVideo({
       inputPath,
@@ -58,6 +94,7 @@ export async function handleExportVideo(
       scaleToHeight,
     });
 
+    console.log("handleClipVideo returned:", clipResult);
     return clipResult;
   } catch (error) {
     console.error("Error exporting video:", error);

@@ -1,17 +1,33 @@
-# ClipForge (Electron Prototype)
+# ClipForge - Video Trimmer
 
 ## Overview
 
-This is a lightweight **Electron + React + FFmpeg** desktop app for basic video editing.  
-The goal of this prototype is to test a clean import → trim → export flow, without project management or AI features.
+ClipForge is a lightweight desktop video editing application built with Electron, React, and FFmpeg. It provides a simple and intuitive interface for importing, trimming, and exporting video clips without the complexity of full-featured video editors.
 
----
+## Features
 
-## Core Features
+### Core Functionality
 
-1. **Import video** — open file picker and preview video.
-2. **Select trim range** — specify start and end times.
-3. **Export clip** — choose output folder, export at same or lower resolution.
+- **Import Video** - Open file picker to select video files (MP4, AVI, MOV, MKV, WebM)
+- **Video Preview** - Native HTML5 video player with controls
+- **Trim Controls** - Set start and end times with visual timeline slider
+- **Export Video** - Save trimmed clips with automatic resolution scaling
+- **Real-time Progress** - Live progress tracking with ETA and processing speed
+
+### User Experience
+
+- **Keyboard Shortcuts** - Quick access to common functions
+- **Toast Notifications** - Clear feedback for all operations
+- **Loading States** - Skeleton loaders and progress indicators
+- **Error Handling** - Comprehensive validation and helpful error messages
+- **Accessibility** - ARIA labels and keyboard navigation support
+
+### Technical Features
+
+- **Secure IPC** - Context isolation with channel whitelist
+- **Real FFmpeg Integration** - Actual video processing with progress parsing
+- **Type Safety** - Full TypeScript support throughout
+- **Performance Optimized** - Memoized components and debounced inputs
 
 ---
 
@@ -141,38 +157,108 @@ ffmpeg -ss 10 -to 25 -i input.mp4 -c copy output.mp4
 
 ---
 
-## Development Setup
+## Keyboard Shortcuts
+
+- `Ctrl/Cmd + O` - Import video
+- `Ctrl/Cmd + E` - Export video
+- `Space` - Play/pause video
+- `Left/Right Arrow` - Adjust start time by 1 second
+- `Up/Down Arrow` - Adjust end time by 1 second
+- `Shift + Arrow Keys` - Adjust by 10 seconds
+
+## Installation & Setup
 
 ### Prerequisites
 
 - Node.js ≥ 20
 - FFmpeg installed and in PATH
+- Bun package manager (recommended) or npm
 
-### Commands
+### Development
 
 ```bash
+# Install dependencies
 bun install
+
+# Start development server
 bun run dev
 ```
 
-This launches both Vite (renderer) and Electron (main).
+This launches both Vite (renderer) and Electron (main) with hot reload.
 
-To build for distribution:
+### Building for Distribution
 
 ```bash
+# Build for current platform
 bun run build
-bun run electron:build
+
+# Build for specific platforms
+bun run build:linux    # Linux AppImage and DEB
+bun run build:win      # Windows NSIS and portable
+bun run build:mac      # macOS DMG
+
+# Build without publishing
+bun run dist
 ```
 
----
+## FFmpeg Installation
 
-## MVP Checklist
+### Linux (Ubuntu/Debian)
 
-- [ ] Import and preview video
-- [ ] Input start/end timestamps
-- [ ] Run FFmpeg trim via IPC
-- [ ] Export to chosen folder
-- [ ] Display export progress in UI
+```bash
+sudo apt update && sudo apt install ffmpeg
+```
+
+### macOS
+
+```bash
+brew install ffmpeg
+```
+
+### Windows
+
+```bash
+# Using Chocolatey
+choco install ffmpeg
+
+# Or download from https://ffmpeg.org/download.html
+```
+
+## Troubleshooting
+
+### FFmpeg Not Found
+
+- Ensure FFmpeg is installed and in your system PATH
+- Run `ffmpeg -version` to verify installation
+- Restart the application after installing FFmpeg
+
+### Video Import Issues
+
+- Check file format is supported (MP4, AVI, MOV, MKV, WebM)
+- Verify file is not corrupted
+- Ensure file permissions allow reading
+
+### Export Failures
+
+- Check available disk space
+- Verify output directory permissions
+- Ensure input file still exists and is accessible
+
+## Project Status
+
+### Completed Features ✅
+
+- [x] Import and preview video
+- [x] Input start/end timestamps with visual timeline
+- [x] Real FFmpeg integration with progress tracking
+- [x] Export to chosen folder with automatic scaling
+- [x] Enhanced progress display with ETA and speed
+- [x] Toast notifications for user feedback
+- [x] Keyboard shortcuts and accessibility
+- [x] Loading states and skeleton UI
+- [x] Comprehensive error handling
+- [x] Performance optimizations
+- [x] Production build configuration
 
 ---
 

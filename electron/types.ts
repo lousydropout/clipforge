@@ -16,9 +16,6 @@ export interface VideoClipParams {
 
 export interface FFmpegProgressData {
   progress: number;
-  time: number;
-  speed: number;
-  eta: number;
 }
 
 export interface FFmpegResult {
@@ -34,4 +31,11 @@ export interface VideoMetadata {
   format: string;
   bitrate?: number;
   fps?: number;
+}
+
+export interface ExportVideoRequest {
+  inputPath: string;
+  startTime: number;
+  endTime: number;
+  scaleToHeight?: number;
 }

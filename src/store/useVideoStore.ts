@@ -17,6 +17,7 @@ interface VideoStore {
   // Trim settings
   startTime: number;
   endTime: number;
+  outputResolutionPercent: number;
 
   // Processing state
   isProcessing: boolean;
@@ -27,6 +28,7 @@ interface VideoStore {
   setVideoMetadata: (metadata: VideoMetadata | null) => void;
   setStartTime: (time: number) => void;
   setEndTime: (time: number) => void;
+  setOutputResolutionPercent: (percent: number) => void;
   setProcessing: (processing: boolean) => void;
   setProgress: (progress: number) => void;
   reset: () => void;
@@ -38,6 +40,7 @@ export const useVideoStore = create<VideoStore>((set) => ({
   videoMetadata: null,
   startTime: 0,
   endTime: 0,
+  outputResolutionPercent: 100,
   isProcessing: false,
   progress: 0,
 
@@ -46,6 +49,8 @@ export const useVideoStore = create<VideoStore>((set) => ({
   setVideoMetadata: (metadata) => set({ videoMetadata: metadata }),
   setStartTime: (time) => set({ startTime: time }),
   setEndTime: (time) => set({ endTime: time }),
+  setOutputResolutionPercent: (percent) =>
+    set({ outputResolutionPercent: percent }),
   setProcessing: (processing) => set({ isProcessing: processing }),
   setProgress: (progress) => set({ progress }),
   reset: () =>
@@ -54,6 +59,7 @@ export const useVideoStore = create<VideoStore>((set) => ({
       videoMetadata: null,
       startTime: 0,
       endTime: 0,
+      outputResolutionPercent: 100,
       isProcessing: false,
       progress: 0,
     }),

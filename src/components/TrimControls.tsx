@@ -2,7 +2,7 @@ import { useVideoStore } from "../store/useVideoStore";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Slider } from "./ui/slider";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
 export function TrimControls() {
   const { videoMetadata, startTime, endTime, setStartTime, setEndTime } =
@@ -40,18 +40,82 @@ export function TrimControls() {
     }
   };
 
-  const handleSliderChange = (values: number[]) => {
-    const [start, end] = values;
-    setStartTime(start);
-    setEndTime(end);
-  };
+  // Debounced slider change handler
+  const handleSliderChange = useCallback(
+    (values: number[]) => {
+      const [start, end] = values;
+      setStartTime(start);
+      setEndTime(end);
+    },
+    [setStartTime, setEndTime]
+  );
 
-  const isValidRange =
-    startTime < endTime && endTime <= (videoMetadata?.duration || 0);
+  // Memoized validation
+  const isValidRange = useMemo(
+    () => startTime < endTime && endTime <= (videoMetadata?.duration || 0),
+    [startTime, endTime, videoMetadata?.duration]
+  );
+
   const duration = videoMetadata?.duration || 0;
 
+  // Keyboard shortcuts for trim adjustment
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!videoMetadata) return;
+
+      const isShiftPressed = event.shiftKey;
+      const step = isShiftPressed ? 10 : 1; // 10 seconds with Shift, 1 second without
+
+      switch (event.key) {
+        case "ArrowLeft":
+          event.preventDefault();
+          setStartTime(Math.max(0, startTime - step));
+          break;
+        case "ArrowRight":
+          event.preventDefault();
+          setStartTime(Math.min(endTime - 0.1, startTime + step));
+          break;
+        case "ArrowUp":
+          event.preventDefault();
+          setEndTime(Math.min(videoMetadata.duration, endTime + step));
+          break;
+        case "ArrowDown":
+          event.preventDefault();
+          setEndTime(Math.max(startTime + 0.1, endTime - step));
+          break;
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [videoMetadata, startTime, endTime, setStartTime, setEndTime]);
+
   if (!videoMetadata) {
-    return null;
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Trim Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Skeleton loading */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="h-4 bg-muted rounded animate-pulse"></div>
+              <div className="h-10 bg-muted rounded animate-pulse"></div>
+            </div>
+            <div className="space-y-2">
+              <div className="h-4 bg-muted rounded animate-pulse"></div>
+              <div className="h-10 bg-muted rounded animate-pulse"></div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 bg-muted rounded animate-pulse w-20"></div>
+            <div className="h-6 bg-muted rounded animate-pulse"></div>
+            <div className="h-3 bg-muted rounded animate-pulse w-32"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
