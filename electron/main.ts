@@ -2,6 +2,8 @@ import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { spawn } from "child_process";
+import { handleClipVideo } from "./ipcHandlers/clipVideo";
+import { handleExportVideo } from "./ipcHandlers/exportVideo";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // The built directory structure
@@ -123,42 +125,11 @@ ipcMain.handle("video.import", async () => {
 });
 
 ipcMain.handle("video.clip", async (_, params) => {
-  // Mock implementation - just return success
-  console.log("Mock video.clip called with params:", params);
-  return {
-    success: true,
-    outputPath: "/mock/output/path.mp4",
-  };
+  return handleClipVideo(params);
 });
 
 ipcMain.handle("video.export", async (_, params) => {
-  // Mock implementation - simulate processing with progress
-  console.log("Mock video.export called with params:", params);
-
-  // Simulate progress updates
-  const mainWindow = BrowserWindow.getAllWindows()[0];
-  if (mainWindow) {
-    for (let i = 0; i <= 100; i += 10) {
-      setTimeout(() => {
-        mainWindow.webContents.send("ffmpeg.progress", {
-          progress: i,
-          time: (i / 100) * (params.endTime - params.startTime),
-          speed: 1.0,
-          eta: ((100 - i) / 10) * 2, // 2 seconds per 10%
-        });
-      }, i * 100); // 100ms per 10%
-    }
-  }
-
-  // Simulate completion after 2 seconds
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        success: true,
-        outputPath: "/mock/exported/video.mp4",
-      });
-    }, 2000);
-  });
+  return handleExportVideo(params);
 });
 
 // Helper function to get video metadata using ffprobe

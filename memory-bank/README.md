@@ -7,6 +7,10 @@ This directory contains project knowledge, context, and documentation to help ma
 - `project-context.md` - Overall project overview and goals
 - `architecture.md` - Technical architecture and design decisions
 - `development-notes.md` - Development progress and insights
+- `task-list.md` - Complete task breakdown with current status
+- `epic-1-completion.md` - Epic 1 completion summary
+- `epic-2-completion.md` - Epic 2 completion summary
+- `epic-3-completion.md` - Epic 3 completion summary
 - `api-reference.md` - API documentation and interfaces
 - `troubleshooting.md` - Common issues and solutions
 

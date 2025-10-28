@@ -14,8 +14,9 @@ No project system, no AI features — just a clean, working pipeline.
 
 - ✅ **Epic 1 Complete**: Electron shell with secure IPC bridge
 - ✅ **Epic 2 Complete**: Frontend Interface (React + Zustand)
-- 🚧 **Epic 3 Next**: IPC Handlers & FFmpeg Integration
-- ⏳ **Epic 4-6 Pending**: UX/Progress & Packaging
+- ✅ **Epic 3 Complete**: IPC Handlers & FFmpeg Integration
+- 🚧 **Epic 4 Next**: UX/Progress & Packaging
+- ⏳ **Epic 5-6 Pending**: Packaging & Distribution
 
 ---
 
@@ -99,64 +100,64 @@ No project system, no AI features — just a clean, working pipeline.
 
 ---
 
-## Epic 3: IPC Handlers (Node / Electron Main Process)
+## Epic 3: IPC Handlers & FFmpeg Integration ✅ COMPLETED
 
-### Story 3.1 – Import Video
+### Story 3.1 – FFmpeg Utility Module ✅
 
-- [ ] Create `ipcHandlers/importVideo.ts`
+- [x] Create `electron/ffmpeg/runFFmpeg.ts`
 
-  - Use `dialog.showOpenDialog`
-  - Return selected video path
+  - Use `child_process.spawn` for FFmpeg execution
+  - Parse stderr lines for progress information
+  - Send `ffmpeg.progress` IPC events to renderer
+  - Handle both fast copy and re-encoding with scaling
 
-- [ ] Test via renderer call `window.api.invoke('video.import')`
+### Story 3.2 – Video Clip Handler ✅
 
-### Story 3.2 – Clip Video (FFmpeg)
-
-- [ ] Create `ipcHandlers/clipVideo.ts`
+- [x] Create `electron/ipcHandlers/clipVideo.ts`
 
   - Accept `{ inputPath, start, end, outputPath, scale }`
-  - Call `runFFmpeg.ts`
+  - Call `runFFmpeg.ts` utility
+  - Validate input parameters
+  - Return success/error status
 
-- [ ] Implement progress streaming via `stderr`
-- [ ] Send `ffmpeg.progress` IPC events back to renderer
+### Story 3.3 – Export Handler ✅
 
-### Story 3.3 – Export Video
+- [x] Create `electron/ipcHandlers/exportVideo.ts`
 
-- [ ] Create `ipcHandlers/exportVideo.ts`
+  - Show save dialog for output location
+  - Generate smart default filenames
+  - Call `clipVideo` handler with parameters
+  - Return output path and status
 
-  - Allow user to select destination folder
-  - Save trimmed clip there
-  - Notify frontend when done
+### Story 3.4 – TypeScript Interfaces ✅
+
+- [x] Create `electron/types.ts`
+
+  - `FFmpegOptions` interface
+  - `VideoClipParams` interface
+  - `FFmpegProgressData` interface
+  - `FFmpegResult` interface
+
+### Story 3.5 – Main Process Integration ✅
+
+- [x] Update `electron/main.ts`
+
+  - Replace mock handlers with real implementations
+  - Import and register new handler modules
+  - Maintain existing `video.import` functionality
+
+### Epic 3 Completion Summary ✅
+
+- **Real FFmpeg Integration**: Complete video processing pipeline
+- **Progress Tracking**: Real-time progress updates during export
+- **Command Generation**: Smart FFmpeg commands for different scenarios
+- **Error Handling**: Comprehensive error handling throughout
+- **Type Safety**: Full TypeScript support with proper interfaces
+- **Testing**: Successfully tested with real video files
 
 ---
 
-## Epic 4: FFmpeg Integration
-
-### Story 4.1 – FFmpeg Utility
-
-- [ ] Create `electron/ffmpeg/runFFmpeg.ts`
-
-  - Use `child_process.spawn`
-  - Log stderr lines for progress
-  - Resolve/reject Promise on close
-
-- [ ] Handle errors gracefully and report to renderer
-
-### Story 4.2 – FFmpeg Commands
-
-- [ ] Base trim command:
-
-  ```bash
-  ffmpeg -ss {start} -to {end} -i {inputPath} -c copy {outputPath}
-  ```
-
-- [ ] With scaling:
-
-  ```bash
-  ffmpeg -ss {start} -to {end} -i {inputPath} -vf "scale=-1:{scale}" -c:a copy {outputPath}
-  ```
-
-- [ ] Test edge cases (invalid timestamps, unsupported formats)
+## Epic 4: UX and Progress Feedback
 
 ---
 
@@ -206,7 +207,8 @@ No project system, no AI features — just a clean, working pipeline.
 - ✅ Working Electron app that can import, trim, and export video
 - ✅ IPC communication with FFmpeg
 - ✅ Functional UI with progress feedback
-- ✅ Bundled executable for Linux (and optionally macOS/Windows)
+- ✅ Real FFmpeg integration with progress tracking
+- ⏳ Bundled executable for Linux (and optionally macOS/Windows)
 
 ---
 
@@ -228,17 +230,24 @@ No project system, no AI features — just a clean, working pipeline.
 9. `src/components/ExportDialog.tsx` - Export settings dialog ✅
 10. `src/App.tsx` - Main app layout integration ✅
 
-### 🚧 Next Priority (Epic 3)
+### ✅ Completed (Epic 3)
 
-11. `electron/ipcHandlers/importVideo.ts` - File dialog handler (replace mock)
-12. `electron/ipcHandlers/clipVideo.ts` - FFmpeg trim handler (replace mock)
-13. `electron/ffmpeg/runFFmpeg.ts` - FFmpeg utility
-14. `electron/ipcHandlers/exportVideo.ts` - Export handler (replace mock)
+11. `electron/types.ts` - Shared TypeScript interfaces ✅
+12. `electron/ffmpeg/runFFmpeg.ts` - FFmpeg utility with progress parsing ✅
+13. `electron/ipcHandlers/clipVideo.ts` - Video trimming handler ✅
+14. `electron/ipcHandlers/exportVideo.ts` - Export workflow handler ✅
+15. `electron/main.ts` - Updated with real FFmpeg handlers ✅
 
-### 🔄 Future (Epic 4-6)
+### 🚧 Next Priority (Epic 4)
 
-15. Enhanced UX and progress feedback
-16. Packaging and distribution
+16. Enhanced UX and progress feedback
+17. File validation improvements
+18. Error handling refinements
+
+### 🔄 Future (Epic 5-6)
+
+19. App packaging and distribution
+20. Cross-platform build configuration
 
 ---
 
