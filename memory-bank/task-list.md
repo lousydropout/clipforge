@@ -13,9 +13,9 @@ No project system, no AI features — just a clean, working pipeline.
 ## Current Status
 
 - ✅ **Epic 1 Complete**: Electron shell with secure IPC bridge
-- 🚧 **Epic 2 Next**: Frontend Interface (React + Zustand)
-- ⏳ **Epic 3-4 Pending**: IPC Handlers & FFmpeg Integration
-- ⏳ **Epic 5-6 Pending**: UX/Progress & Packaging
+- ✅ **Epic 2 Complete**: Frontend Interface (React + Zustand)
+- 🚧 **Epic 3 Next**: IPC Handlers & FFmpeg Integration
+- ⏳ **Epic 4-6 Pending**: UX/Progress & Packaging
 
 ---
 
@@ -55,36 +55,47 @@ No project system, no AI features — just a clean, working pipeline.
 
 ---
 
-## Epic 2: Frontend Interface (React + Zustand) 🚧 NEXT
+## Epic 2: Frontend Interface (React + Zustand) ✅ COMPLETED
 
-### Story 2.1 – UI Scaffolding
+### Story 2.1 – UI Scaffolding ✅
 
-- [ ] Create base layout in `App.tsx`
-- [ ] Add TailwindCSS and shadcn/ui setup
-- [ ] Implement `<VideoPlayer />` for preview using native `<video>` tag
-- [ ] Implement `<TrimControls />` for start/end inputs
-- [ ] Implement `<ExportDialog />` for save path + scale choice
+- [x] Create base layout in `App.tsx`
+- [x] Add TailwindCSS and shadcn/ui setup
+- [x] Implement `<VideoPlayer />` for preview using native `<video>` tag
+- [x] Implement `<TrimControls />` for start/end inputs
+- [x] Implement `<ExportDialog />` for save path + scale choice
 
-### Story 2.2 – State Management
+### Story 2.2 – State Management ✅
 
-- [ ] Create Zustand store `useVideoStore.ts`:
+- [x] Create Zustand store `useVideoStore.ts`:
 
   ```ts
   interface VideoState {
-    filePath: string | null;
-    start: number;
-    end: number;
-    scale: number | null;
+    videoPath: string | null;
+    startTime: number;
+    endTime: number;
+    isProcessing: boolean;
+    progress: number;
   }
   ```
 
-- [ ] Actions: `setFilePath`, `setStart`, `setEnd`, `setScale`, `reset()`
+- [x] Actions: `setVideoPath`, `setStartTime`, `setEndTime`, `setProcessing`, `setProgress`, `reset()`
 
-### Story 2.3 – User Flow Integration
+### Story 2.3 – User Flow Integration ✅
 
-- [ ] Import → preview video path
-- [ ] Adjust start/end → show markers
-- [ ] Export → trigger IPC handler → display progress
+- [x] Import → preview video path
+- [x] Adjust start/end → show markers
+- [x] Export → trigger IPC handler → display progress
+
+### Epic 2 Completion Summary ✅
+
+- **UI Components**: Complete video player, trim controls, and export dialog
+- **State Management**: Zustand store with all video state and actions
+- **IPC Integration**: Type-safe IPC client wrapper for all video operations
+- **Real Metadata**: FFprobe integration for actual video metadata extraction
+- **Mock Handlers**: Working mock implementations for testing UI functionality
+- **Responsive Design**: Clean, modern UI with TailwindCSS and shadcn/ui
+- **Error Handling**: Comprehensive error states and user feedback
 
 ---
 
@@ -208,21 +219,26 @@ No project system, no AI features — just a clean, working pipeline.
 3. `electron/electron-env.d.ts` ✅
 4. `src/App.tsx` (basic test setup) ✅
 
-### 🚧 Next Priority (Epic 2)
+### ✅ Completed (Epic 2)
 
-5. `src/store/useVideoStore.ts` - Zustand state management
-6. `src/services/ipcClient.ts` - IPC service wrappers
-7. `src/components/VideoPlayer.tsx` - Video preview component
-8. `src/components/TrimControls.tsx` - Time selection controls
-9. `src/components/ExportDialog.tsx` - Export settings dialog
-10. `src/App.tsx` - Main app layout integration
+5. `src/store/useVideoStore.ts` - Zustand state management ✅
+6. `src/services/ipcClient.ts` - IPC service wrappers ✅
+7. `src/components/VideoPlayer.tsx` - Video preview component ✅
+8. `src/components/TrimControls.tsx` - Time selection controls ✅
+9. `src/components/ExportDialog.tsx` - Export settings dialog ✅
+10. `src/App.tsx` - Main app layout integration ✅
 
-### 🔄 Future (Epic 3-4)
+### 🚧 Next Priority (Epic 3)
 
-11. `electron/ipcHandlers/importVideo.ts` - File dialog handler
-12. `electron/ipcHandlers/clipVideo.ts` - FFmpeg trim handler
+11. `electron/ipcHandlers/importVideo.ts` - File dialog handler (replace mock)
+12. `electron/ipcHandlers/clipVideo.ts` - FFmpeg trim handler (replace mock)
 13. `electron/ffmpeg/runFFmpeg.ts` - FFmpeg utility
-14. `electron/ipcHandlers/exportVideo.ts` - Export handler
+14. `electron/ipcHandlers/exportVideo.ts` - Export handler (replace mock)
+
+### 🔄 Future (Epic 4-6)
+
+15. Enhanced UX and progress feedback
+16. Packaging and distribution
 
 ---
 
