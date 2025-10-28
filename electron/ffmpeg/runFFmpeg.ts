@@ -2,12 +2,27 @@
 import { spawn, ChildProcess } from "child_process";
 import { BrowserWindow } from "electron";
 import { FFmpegOptions, FFmpegProgressData, FFmpegResult } from "../types";
+import * as fs from "fs";
+import * as path from "path";
 
 function parseHMS(hms: string): number {
   const m = hms.trim().match(/^(\d+):([0-5]?\d):([0-5]?\d(?:\.\d+)?)/);
   if (!m) return 0;
   const [, H, M, S] = m;
   return parseInt(H, 10) * 3600 + parseInt(M, 10) * 60 + parseFloat(S);
+}
+
+function getFFmpegPath(): string {
+  // Try bundled FFmpeg first (for production builds)
+  const bundledPath = path.join(process.resourcesPath, "bin", "linux", "ffmpeg");
+  if (fs.existsSync(bundledPath)) {
+    console.log("Using bundled FFmpeg:", bundledPath);
+    return bundledPath;
+  }
+  
+  // Fallback to system FFmpeg (for development)
+  console.log("Using system FFmpeg from PATH");
+  return "ffmpeg";
 }
 
 export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
@@ -55,9 +70,10 @@ export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
 
     args.push("-progress", "pipe:1", "-nostdin", "-y", outputPath);
 
-    console.log("Running FFmpeg command:", ["ffmpeg", ...args].join(" "));
+    const ffmpegPath = getFFmpegPath();
+    console.log("Running FFmpeg command:", [ffmpegPath, ...args].join(" "));
 
-    const ffmpeg: ChildProcess = spawn("ffmpeg", args, {
+    const ffmpeg: ChildProcess = spawn(ffmpegPath, args, {
       stdio: ["ignore", "pipe", "pipe"],
     });
     const mainWindow = BrowserWindow.getAllWindows()[0];

@@ -15,7 +15,7 @@
   // ----- What to Include -----
   files: [
     "dist/**/*",
-    "electron/**/*",
+    "dist-electron/**/*",
     "package.json"
   ],
 
@@ -59,7 +59,7 @@
   asarUnpack: ["bin/**"],
 
   // Preserve ffmpeg permissions for Linux
-  afterPack: "scripts/afterPack.js",
+  afterPack: "scripts/afterPack.cjs",
 
   // Disable auto publishing (manual releases)
   publish: null

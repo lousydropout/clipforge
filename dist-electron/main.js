@@ -2,13 +2,24 @@ import { BrowserWindow, dialog, app, ipcMain } from "electron";
 import { fileURLToPath } from "node:url";
 import path$1 from "node:path";
 import { spawn } from "child_process";
-import path from "path";
+import * as fs from "fs";
 import { statSync } from "fs";
+import * as path from "path";
+import path__default from "path";
 function parseHMS(hms) {
   const m = hms.trim().match(/^(\d+):([0-5]?\d):([0-5]?\d(?:\.\d+)?)/);
   if (!m) return 0;
   const [, H, M, S] = m;
   return parseInt(H, 10) * 3600 + parseInt(M, 10) * 60 + parseFloat(S);
+}
+function getFFmpegPath() {
+  const bundledPath = path.join(process.resourcesPath, "bin", "linux", "ffmpeg");
+  if (fs.existsSync(bundledPath)) {
+    console.log("Using bundled FFmpeg:", bundledPath);
+    return bundledPath;
+  }
+  console.log("Using system FFmpeg from PATH");
+  return "ffmpeg";
 }
 async function runFFmpeg(options) {
   return new Promise((resolve, reject) => {
@@ -48,8 +59,9 @@ async function runFFmpeg(options) {
       args.push("-c", "copy");
     }
     args.push("-progress", "pipe:1", "-nostdin", "-y", outputPath);
-    console.log("Running FFmpeg command:", ["ffmpeg", ...args].join(" "));
-    const ffmpeg = spawn("ffmpeg", args, {
+    const ffmpegPath = getFFmpegPath();
+    console.log("Running FFmpeg command:", [ffmpegPath, ...args].join(" "));
+    const ffmpeg = spawn(ffmpegPath, args, {
       stdio: ["ignore", "pipe", "pipe"]
     });
     const mainWindow = BrowserWindow.getAllWindows()[0];
@@ -206,7 +218,7 @@ async function handleExportVideo(params) {
       };
     }
     try {
-      const outputDir = path.dirname(outputPath);
+      const outputDir = path__default.dirname(outputPath);
       const stats = statSync(outputDir);
       if (!stats.isDirectory()) {
         return {
@@ -245,9 +257,9 @@ async function handleExportVideo(params) {
   }
 }
 function generateDefaultFilename(inputPath) {
-  const parsedPath = path.parse(inputPath);
+  const parsedPath = path__default.parse(inputPath);
   const timestamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  return path.join(
+  return path__default.join(
     parsedPath.dir,
     `${parsedPath.name}_trimmed_${timestamp}.mp4`
   );

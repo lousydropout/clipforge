@@ -15,8 +15,9 @@ No project system, no AI features — just a clean, working pipeline.
 - ✅ **Epic 1 Complete**: Electron shell with secure IPC bridge
 - ✅ **Epic 2 Complete**: Frontend Interface (React + Zustand)
 - ✅ **Epic 3 Complete**: IPC Handlers & FFmpeg Integration
-- 🚧 **Epic 4 Next**: UX/Progress & Packaging
-- ⏳ **Epic 5-6 Pending**: Packaging & Distribution
+- ✅ **Epic 4 Complete**: UX/Progress & Packaging (Linux with bundled FFmpeg)
+- ✅ **Epic 7 Complete**: UI Enhancements (doubled video player, tabbed settings)
+- ⏳ **Epic 5-6 Pending**: Additional UX/Progress features
 
 ---
 
@@ -192,7 +193,32 @@ No project system, no AI features — just a clean, working pipeline.
 
 ---
 
-## Epic 7: Optional Enhancements (Post-MVP)
+## Epic 7: UI Enhancements ✅ COMPLETED
+
+### Story 7.1 – Video Player Improvements ✅
+
+- [x] Double the height of the video player (h-64 → h-128)
+- [x] Enhanced video player prominence in the interface
+
+### Story 7.2 – Settings Organization ✅
+
+- [x] Convert Trim Settings, Output Resolution, and Export Video to shadcn/ui tabs
+- [x] Create SettingsTabs component with clean tabbed interface
+- [x] Remove Card wrappers from individual components
+- [x] Add visual styling improvements (borders, padding, cursor pointers)
+- [x] Add separator between video player and settings
+
+### Epic 7 Completion Summary ✅
+
+- **Video Player**: Doubled height for better video preview experience
+- **Tabbed Interface**: Clean organization of settings using shadcn/ui tabs
+- **Visual Polish**: Added borders, padding, and cursor styling
+- **Component Refactoring**: Removed redundant Card wrappers, streamlined structure
+- **User Experience**: More organized and visually appealing interface
+
+---
+
+## Epic 8: Optional Enhancements (Post-MVP)
 
 - [ ] Add waveform / timeline visualization
 - [ ] Add drag-to-select trim range

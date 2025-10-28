@@ -201,6 +201,34 @@ bun run build:mac      # macOS DMG
 bun run dist
 ```
 
+#### Build Output
+
+The build process creates the following artifacts in the `dist/` directory:
+
+- **Linux**: `ClipForge-0.1.0-linux-x64.AppImage` and `ClipForge-0.1.0-linux-x64.deb`
+- **Windows**: `ClipForge-0.1.0-win-x64.exe` (NSIS installer) and `ClipForge-0.1.0-win-x64-portable.exe`
+- **macOS**: `ClipForge-0.1.0-mac-x64.dmg`
+
+#### FFmpeg Bundling
+
+The application includes bundled FFmpeg binaries for Linux, eliminating the need for users to install FFmpeg separately. The binaries are automatically extracted and configured during the build process.
+
+**Bundled FFmpeg Details:**
+- Source: Static builds from johnvansickle.com
+- License: GPL v3 (included in `bin/linux/`)
+- Size: ~80MB per platform
+- Architecture: x64 (AMD64)
+
+#### Build Configuration
+
+The build process is configured in `electron-builder.json5`:
+
+- **App ID**: `com.clipforge.app`
+- **Product Name**: `ClipForge`
+- **Icons**: Multiple sizes (16x16 to 512x512) in `assets/icons/png/`
+- **Output Directory**: `dist/`
+- **Extra Resources**: FFmpeg binaries in `bin/linux/`
+
 ## FFmpeg Installation
 
 ### Linux (Ubuntu/Debian)

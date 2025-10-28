@@ -34,7 +34,7 @@ export function VideoPlayer() {
   if (!videoPath) {
     return (
       <Card className="w-full">
-        <CardContent className="flex items-center justify-center h-64 bg-muted/50">
+        <CardContent className="flex items-center justify-center h-128 bg-muted/50">
           <div className="text-center">
             <div className="text-4xl mb-2">🎬</div>
             <p className="text-muted-foreground">No video selected</p>
@@ -59,7 +59,7 @@ export function VideoPlayer() {
                 : `file://${videoPath}`
             }
             controls
-            className="w-full h-64 object-contain bg-black rounded-t-lg"
+            className="w-full h-128 object-contain bg-black rounded-t-lg"
             preload="metadata"
             aria-label="Video player"
             onLoadedData={() => setIsLoading(false)}

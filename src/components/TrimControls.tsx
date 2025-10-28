@@ -1,5 +1,4 @@
 import { useVideoStore } from "../store/useVideoStore";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Slider } from "./ui/slider";
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -92,87 +91,77 @@ export function TrimControls() {
 
   if (!videoMetadata) {
     return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Trim Settings</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Skeleton loading */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <div className="h-4 bg-muted rounded animate-pulse"></div>
-              <div className="h-10 bg-muted rounded animate-pulse"></div>
-            </div>
-            <div className="space-y-2">
-              <div className="h-4 bg-muted rounded animate-pulse"></div>
-              <div className="h-10 bg-muted rounded animate-pulse"></div>
-            </div>
+      <div className="space-y-4">
+        {/* Skeleton loading */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <div className="h-4 bg-muted rounded animate-pulse"></div>
+            <div className="h-10 bg-muted rounded animate-pulse"></div>
           </div>
           <div className="space-y-2">
-            <div className="h-4 bg-muted rounded animate-pulse w-20"></div>
-            <div className="h-6 bg-muted rounded animate-pulse"></div>
-            <div className="h-3 bg-muted rounded animate-pulse w-32"></div>
+            <div className="h-4 bg-muted rounded animate-pulse"></div>
+            <div className="h-10 bg-muted rounded animate-pulse"></div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="space-y-2">
+          <div className="h-4 bg-muted rounded animate-pulse w-20"></div>
+          <div className="h-6 bg-muted rounded animate-pulse"></div>
+          <div className="h-3 bg-muted rounded animate-pulse w-32"></div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Trim Settings</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Time inputs */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Start Time</label>
-            <Input
-              value={startTimeInput}
-              onChange={(e) => handleStartTimeChange(e.target.value)}
-              placeholder="00:00"
-              className={!isValidRange ? "border-destructive" : ""}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">End Time</label>
-            <Input
-              value={endTimeInput}
-              onChange={(e) => handleEndTimeChange(e.target.value)}
-              placeholder="00:00"
-              className={!isValidRange ? "border-destructive" : ""}
-            />
-          </div>
-        </div>
-
-        {/* Timeline slider */}
+    <div className="space-y-4">
+      {/* Time inputs */}
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Timeline</label>
-          <Slider
-            value={[startTime, endTime]}
-            onValueChange={handleSliderChange}
-            max={duration}
-            step={0.1}
-            className="w-full"
+          <label className="text-sm font-medium">Start Time</label>
+          <Input
+            value={startTimeInput}
+            onChange={(e) => handleStartTimeChange(e.target.value)}
+            placeholder="00:00"
+            className={!isValidRange ? "border-destructive" : ""}
           />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{formatTime(startTime)}</span>
-            <span>Duration: {formatTime(endTime - startTime)}</span>
-            <span>{formatTime(endTime)}</span>
-          </div>
         </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">End Time</label>
+          <Input
+            value={endTimeInput}
+            onChange={(e) => handleEndTimeChange(e.target.value)}
+            placeholder="00:00"
+            className={!isValidRange ? "border-destructive" : ""}
+          />
+        </div>
+      </div>
 
-        {/* Validation message */}
-        {!isValidRange && (
-          <div className="text-sm text-destructive">
-            {startTime >= endTime
-              ? "Start time must be less than end time"
-              : "End time cannot exceed video duration"}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {/* Timeline slider */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Timeline</label>
+        <Slider
+          value={[startTime, endTime]}
+          onValueChange={handleSliderChange}
+          max={duration}
+          step={0.1}
+          className="w-full"
+        />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>{formatTime(startTime)}</span>
+          <span>Duration: {formatTime(endTime - startTime)}</span>
+          <span>{formatTime(endTime)}</span>
+        </div>
+      </div>
+
+      {/* Validation message */}
+      {!isValidRange && (
+        <div className="text-sm text-destructive">
+          {startTime >= endTime
+            ? "Start time must be less than end time"
+            : "End time cannot exceed video duration"}
+        </div>
+      )}
+    </div>
   );
 }
 

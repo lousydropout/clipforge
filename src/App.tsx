@@ -1,13 +1,12 @@
 import { useVideoStore } from "./store/useVideoStore";
 import { ipcClient } from "./services/ipcClient";
 import { VideoPlayer } from "./components/VideoPlayer";
-import { TrimControls } from "./components/TrimControls";
-import { ResolutionControls } from "./components/ResolutionControls";
-import { ExportDialog } from "./components/ExportDialog";
+import { SettingsTabs } from "./components/SettingsTabs";
 import { Button } from "./components/ui/button";
 import { useState, useEffect } from "react";
 import { Toaster, toast } from "sonner";
 import "./App.css";
+import { Separator } from "@radix-ui/react-separator";
 
 function App() {
   const { videoPath, setVideoPath, setVideoMetadata, reset } = useVideoStore();
@@ -136,29 +135,12 @@ function App() {
           {/* Video Player */}
           <VideoPlayer />
 
-          {/* Trim Controls - Only show when video is loaded */}
-          {videoPath && <TrimControls />}
-
-          {/* Resolution Controls - Only show when video is loaded */}
-          {videoPath && <ResolutionControls />}
-
-          {/* Export Dialog - Only show when video is loaded */}
-          {videoPath && <ExportDialog />}
-
-          {/* Welcome Message - Only show when no video is loaded */}
-          {!videoPath && (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🎬</div>
-              <h2 className="text-2xl font-semibold mb-2">
-                Welcome to ClipForge
-              </h2>
-              <p className="text-muted-foreground mb-6">
-                Import a video file to start trimming and exporting clips
-              </p>
-              <Button onClick={handleImportVideo} size="lg">
-                Get Started
-              </Button>
-            </div>
+          {/* Settings Tabs - Only show when video is loaded */}
+          {videoPath && (
+            <>
+              <Separator orientation="vertical" className="py-4" />
+              <SettingsTabs />
+            </>
           )}
         </div>
       </main>

@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Slider } from "./ui/slider";
 import { useVideoStore } from "../store/useVideoStore";
 import { useMemo } from "react";
@@ -19,61 +18,51 @@ export function ResolutionControls() {
 
   if (!videoMetadata) {
     return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Output Resolution</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="h-4 bg-muted rounded animate-pulse"></div>
-            <div className="h-10 bg-muted rounded animate-pulse"></div>
-            <div className="h-4 bg-muted rounded animate-pulse w-32"></div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <div className="h-4 bg-muted rounded animate-pulse"></div>
+          <div className="h-10 bg-muted rounded animate-pulse"></div>
+          <div className="h-4 bg-muted rounded animate-pulse w-32"></div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Output Resolution</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Resolution Scale</span>
-            <span>{outputResolutionPercent}%</span>
-          </div>
-          <Slider
-            value={[outputResolutionPercent]}
-            onValueChange={([value]) => setOutputResolutionPercent(value)}
-            min={25}
-            max={100}
-            step={5}
-            className="w-full"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>25%</span>
-            <span>100%</span>
-          </div>
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm">
+          <span>Resolution Scale</span>
+          <span>{outputResolutionPercent}%</span>
         </div>
+        <Slider
+          value={[outputResolutionPercent]}
+          onValueChange={([value]) => setOutputResolutionPercent(value)}
+          min={25}
+          max={100}
+          step={5}
+          className="w-full"
+        />
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>25%</span>
+          <span>100%</span>
+        </div>
+      </div>
 
-        <div className="text-sm text-muted-foreground">
-          <div className="flex justify-between">
-            <span>Original:</span>
-            <span>
-              {videoMetadata.width} × {videoMetadata.height}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span>Output:</span>
-            <span>
-              {outputResolution.width} × {outputResolution.height}
-            </span>
-          </div>
+      <div className="text-sm text-muted-foreground">
+        <div className="flex justify-between">
+          <span>Original:</span>
+          <span>
+            {videoMetadata.width} × {videoMetadata.height}
+          </span>
         </div>
-      </CardContent>
-    </Card>
+        <div className="flex justify-between">
+          <span>Output:</span>
+          <span>
+            {outputResolution.width} × {outputResolution.height}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
