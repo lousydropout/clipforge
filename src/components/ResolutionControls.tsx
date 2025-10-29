@@ -3,8 +3,15 @@ import { useVideoStore } from "../store/useVideoStore";
 import { useMemo } from "react";
 
 export function ResolutionControls() {
-  const { videoMetadata, outputResolutionPercent, setOutputResolutionPercent } =
-    useVideoStore();
+  const videoMetadata = useVideoStore((state) => state.videoMetadata);
+  const outputResolutionPercent = useVideoStore(
+    (state) => state.outputResolutionPercent
+  );
+  const setOutputResolutionPercent = useVideoStore(
+    (state) => state.setOutputResolutionPercent
+  );
+  const playbackSpeed = useVideoStore((state) => state.playbackSpeed);
+  const setPlaybackSpeed = useVideoStore((state) => state.setPlaybackSpeed);
 
   const outputResolution = useMemo(() => {
     if (!videoMetadata) return { width: 0, height: 0 };
@@ -20,9 +27,9 @@ export function ResolutionControls() {
     return (
       <div className="space-y-4">
         <div className="space-y-2">
-          <div className="h-4 bg-muted rounded animate-pulse"></div>
-          <div className="h-10 bg-muted rounded animate-pulse"></div>
-          <div className="h-4 bg-muted rounded animate-pulse w-32"></div>
+          <div className="h-4 bg-gray-700 rounded animate-pulse"></div>
+          <div className="h-10 bg-gray-700 rounded animate-pulse"></div>
+          <div className="h-4 bg-gray-700 rounded animate-pulse w-32"></div>
         </div>
       </div>
     );
@@ -31,7 +38,7 @@ export function ResolutionControls() {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <div className="flex justify-between text-sm">
+        <div className="flex justify-between text-sm text-gray-300">
           <span>Resolution Scale</span>
           <span>{outputResolutionPercent}%</span>
         </div>
@@ -43,19 +50,32 @@ export function ResolutionControls() {
           step={5}
           className="w-full"
         />
-        <div className="flex justify-between text-xs text-muted-foreground">
+        <div className="flex justify-between text-xs text-gray-400">
           <span>25%</span>
           <span>100%</span>
         </div>
       </div>
 
-      <div className="text-sm text-muted-foreground">
-        <div className="flex justify-between">
-          <span>Original:</span>
-          <span>
-            {videoMetadata.width} × {videoMetadata.height}
-          </span>
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm text-gray-300">
+          <span>Playback Speed</span>
+          <span>{playbackSpeed}x</span>
         </div>
+        <Slider
+          value={[playbackSpeed]}
+          onValueChange={([value]) => setPlaybackSpeed(value)}
+          min={0.5}
+          max={2}
+          step={0.1}
+          className="w-full"
+        />
+        <div className="flex justify-between text-xs text-gray-400">
+          <span>0.5x</span>
+          <span>2x</span>
+        </div>
+      </div>
+
+      <div className="text-sm text-gray-400">
         <div className="flex justify-between">
           <span>Output:</span>
           <span>

@@ -1,11 +1,38 @@
 import { useVideoStore } from "../store/useVideoStore";
 import { Card, CardContent } from "./ui/card";
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 
-export function VideoPlayer() {
-  const { videoPath, videoMetadata } = useVideoStore();
+export interface VideoPlayerRef {
+  seekTo: (time: number) => void;
+  getCurrentTime: () => number;
+}
+
+export const VideoPlayer = forwardRef<VideoPlayerRef>((props, ref) => {
+  const videoPath = useVideoStore((state) => state.videoPath);
+  const videoMetadata = useVideoStore((state) => state.videoMetadata);
+  const currentTime = useVideoStore((state) => state.currentTime);
+  const setCurrentTime = useVideoStore((state) => state.setCurrentTime);
+  const playbackSpeed = useVideoStore((state) => state.playbackSpeed);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  useImperativeHandle(ref, () => ({
+    seekTo: (time: number) => {
+      if (videoRef.current) {
+        videoRef.current.currentTime = time;
+        setCurrentTime(time);
+      }
+    },
+    getCurrentTime: () => {
+      return videoRef.current?.currentTime || 0;
+    },
+  }));
 
   // Keyboard shortcuts for video playback
   useEffect(() => {
@@ -31,14 +58,91 @@ export function VideoPlayer() {
     }
   }, [videoPath]);
 
+  // This useEffect is now handled by the second useEffect below
+
+  // Attach event listeners when video element is ready
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(video.currentTime);
+    };
+
+    const handleSeeked = () => {
+      setCurrentTime(video.currentTime);
+    };
+
+    const handlePlay = () => {
+      setCurrentTime(video.currentTime);
+    };
+
+    const handlePause = () => {
+      setCurrentTime(video.currentTime);
+    };
+
+    // Simple polling mechanism for video time updates
+    let pollInterval: NodeJS.Timeout;
+
+    const startPolling = () => {
+      pollInterval = setInterval(() => {
+        if (video && !video.paused) {
+          setCurrentTime(video.currentTime);
+        }
+      }, 100); // Update every 100ms
+    };
+
+    const stopPolling = () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
+
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("seeked", handleSeeked);
+    video.addEventListener("play", () => {
+      handlePlay();
+      startPolling();
+    });
+    video.addEventListener("pause", () => {
+      handlePause();
+      stopPolling();
+    });
+
+    return () => {
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("seeked", handleSeeked);
+      video.removeEventListener("play", () => {
+        handlePlay();
+        startPolling();
+      });
+      video.removeEventListener("pause", () => {
+        handlePause();
+        stopPolling();
+      });
+      stopPolling();
+    };
+  }, [videoPath, setCurrentTime]);
+
+  // Apply playback speed to video element
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.playbackRate = playbackSpeed;
+    }
+  }, [playbackSpeed]);
+
   if (!videoPath) {
     return (
-      <Card className="w-full">
-        <CardContent className="flex items-center justify-center h-128 bg-muted/50">
+      <Card className="w-full bg-gray-800 border-gray-700">
+        <CardContent className="flex items-center justify-center h-128 bg-gray-800">
           <div className="text-center">
             <div className="text-4xl mb-2">🎬</div>
-            <p className="text-muted-foreground">No video selected</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-gray-300">No video selected</p>
+            <p className="text-sm text-gray-400">
               Click "Import Video" to get started
             </p>
           </div>
@@ -48,7 +152,7 @@ export function VideoPlayer() {
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-full bg-gray-800 border-gray-700">
       <CardContent className="p-0">
         <div className="relative">
           <video
@@ -80,14 +184,14 @@ export function VideoPlayer() {
         </div>
 
         {videoMetadata && (
-          <div className="p-4 space-y-1">
-            <div className="flex justify-between text-sm text-muted-foreground">
+          <div className="p-4 space-y-1 bg-gray-800">
+            <div className="flex justify-between text-sm text-gray-300">
               <span>Duration: {formatTime(videoMetadata.duration)}</span>
               <span>
                 {videoMetadata.width} × {videoMetadata.height}
               </span>
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-gray-400">
               Format: {videoMetadata.format}
             </div>
           </div>
@@ -95,7 +199,9 @@ export function VideoPlayer() {
       </CardContent>
     </Card>
   );
-}
+});
+
+VideoPlayer.displayName = "VideoPlayer";
 
 function formatTime(seconds: number): string {
   const hours = Math.floor(seconds / 3600);

@@ -26,12 +26,14 @@ export interface ExportVideoRequest {
   startTime: number;
   endTime: number;
   scaleToHeight?: number;
+  playbackSpeed?: number;
 }
 
 export interface ExportVideoResponse {
   success: boolean;
   outputPath?: string;
   error?: string;
+  cancelled?: boolean;
 }
 
 export interface FFmpegProgress {

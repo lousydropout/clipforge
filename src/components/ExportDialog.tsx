@@ -6,17 +6,18 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 
 export function ExportDialog() {
-  const {
-    videoPath,
-    videoMetadata,
-    startTime,
-    endTime,
-    outputResolutionPercent,
-    isProcessing,
-    progress,
-    setProcessing,
-    setProgress,
-  } = useVideoStore();
+  const videoPath = useVideoStore((state) => state.videoPath);
+  const videoMetadata = useVideoStore((state) => state.videoMetadata);
+  const startTime = useVideoStore((state) => state.startTime);
+  const endTime = useVideoStore((state) => state.endTime);
+  const outputResolutionPercent = useVideoStore(
+    (state) => state.outputResolutionPercent
+  );
+  const playbackSpeed = useVideoStore((state) => state.playbackSpeed);
+  const isProcessing = useVideoStore((state) => state.isProcessing);
+  const progress = useVideoStore((state) => state.progress);
+  const setProcessing = useVideoStore((state) => state.setProcessing);
+  const setProgress = useVideoStore((state) => state.setProgress);
 
   const [exportStatus, setExportStatus] = useState<
     "idle" | "success" | "error"
@@ -64,17 +65,31 @@ export function ExportDialog() {
     setErrorMessage("");
 
     try {
+      // Get fresh value from store right before export
+      const currentSpeed = useVideoStore.getState().playbackSpeed;
+      // Calculate output height based on resolution control
+      const outputHeight = Math.round(
+        (videoMetadata.height * outputResolutionPercent) / 100
+      );
+
       const result = await ipcClient.exportVideo({
         inputPath: videoPath,
         startTime,
         endTime,
-        scaleToHeight: videoMetadata.height > 720 ? 720 : undefined, // Scale down if > 720p
+        scaleToHeight:
+          outputResolutionPercent !== 100 ? outputHeight : undefined,
+        playbackSpeed: currentSpeed, // Use fresh value from getState
       });
 
       if (result.success) {
         setExportStatus("success");
         setProgress(100);
         toast.success("Video exported successfully!");
+      } else if (result.cancelled) {
+        // User cancelled the export - don't show as error
+        setExportStatus("idle");
+        setProgress(0);
+        setErrorMessage("");
       } else {
         setExportStatus("error");
         const errorMsg = result.error || "Export failed";
@@ -112,8 +127,8 @@ export function ExportDialog() {
   return (
     <div className="space-y-4">
       {/* Export info */}
-      <div className="text-sm text-muted-foreground">
-        <p>Duration: {formatTime(endTime - startTime)}</p>
+      <div className="text-sm text-gray-300">
+        <p>Duration: {formatTime((endTime - startTime) / playbackSpeed)}</p>
         <p>
           Resolution:{" "}
           {outputResolutionPercent === 100
@@ -129,14 +144,14 @@ export function ExportDialog() {
       {/* Progress bar */}
       {isProcessing && (
         <div className="space-y-3">
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-sm text-gray-300">
             <span>Exporting...</span>
             <span>{Math.round(progress)}%</span>
           </div>
           <Progress value={progress} className="w-full" />
 
           {/* Progress information */}
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-gray-400">
             <div>
               <span className="font-medium">Progress:</span>{" "}
               {Math.round(progress)}% of {formatTime(endTime - startTime)}{" "}
@@ -148,16 +163,16 @@ export function ExportDialog() {
 
       {/* Status messages */}
       {exportStatus === "success" && (
-        <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-          <p className="text-sm text-green-800">
+        <div className="p-3 bg-green-900/20 border border-green-700 rounded-md">
+          <p className="text-sm text-green-400">
             ✅ Video exported successfully!
           </p>
         </div>
       )}
 
       {exportStatus === "error" && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-800">
+        <div className="p-3 bg-red-900/20 border border-red-700 rounded-md">
+          <p className="text-sm text-red-400">
             ❌ Export failed: {errorMessage}
           </p>
         </div>
@@ -168,7 +183,7 @@ export function ExportDialog() {
         <Button
           onClick={handleExport}
           disabled={!canExport || isProcessing}
-          className="flex-1"
+          className="flex-1 bg-gray-600 text-white hover:bg-gray-500"
           data-export-button
           aria-label={isProcessing ? "Exporting video..." : "Export video"}
         >
@@ -184,7 +199,7 @@ export function ExportDialog() {
 
       {/* Validation message */}
       {!canExport && videoPath && (
-        <div className="text-sm text-destructive">
+        <div className="text-sm text-red-400">
           {!videoMetadata
             ? "Video metadata not available"
             : startTime >= endTime

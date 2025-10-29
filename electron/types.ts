@@ -4,6 +4,7 @@ export interface FFmpegOptions {
   startTime: number;
   endTime: number;
   scaleToHeight?: number;
+  playbackSpeed?: number;
 }
 
 export interface VideoClipParams {
@@ -12,6 +13,7 @@ export interface VideoClipParams {
   startTime: number;
   endTime: number;
   scaleToHeight?: number;
+  playbackSpeed?: number;
 }
 
 export interface FFmpegProgressData {
@@ -22,6 +24,7 @@ export interface FFmpegResult {
   success: boolean;
   outputPath?: string;
   error?: string;
+  cancelled?: boolean;
 }
 
 export interface VideoMetadata {
@@ -38,4 +41,5 @@ export interface ExportVideoRequest {
   startTime: number;
   endTime: number;
   scaleToHeight?: number;
+  playbackSpeed?: number;
 }

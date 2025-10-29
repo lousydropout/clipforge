@@ -23,6 +23,11 @@ interface VideoStore {
   isProcessing: boolean;
   progress: number;
 
+  // Timeline state
+  currentTime: number;
+  timelineZoom: number;
+  playbackSpeed: number;
+
   // Actions
   setVideoPath: (path: string | null) => void;
   setVideoMetadata: (metadata: VideoMetadata | null) => void;
@@ -31,6 +36,9 @@ interface VideoStore {
   setOutputResolutionPercent: (percent: number) => void;
   setProcessing: (processing: boolean) => void;
   setProgress: (progress: number) => void;
+  setCurrentTime: (time: number) => void;
+  setTimelineZoom: (zoom: number) => void;
+  setPlaybackSpeed: (speed: number) => void;
   reset: () => void;
 }
 
@@ -43,6 +51,9 @@ export const useVideoStore = create<VideoStore>((set) => ({
   outputResolutionPercent: 100,
   isProcessing: false,
   progress: 0,
+  currentTime: 0,
+  timelineZoom: 1.0,
+  playbackSpeed: 1.0,
 
   // Actions
   setVideoPath: (path) => set({ videoPath: path }),
@@ -53,6 +64,9 @@ export const useVideoStore = create<VideoStore>((set) => ({
     set({ outputResolutionPercent: percent }),
   setProcessing: (processing) => set({ isProcessing: processing }),
   setProgress: (progress) => set({ progress }),
+  setCurrentTime: (time) => set({ currentTime: time }),
+  setTimelineZoom: (zoom) => set({ timelineZoom: zoom }),
+  setPlaybackSpeed: (speed) => set({ playbackSpeed: speed }),
   reset: () =>
     set({
       videoPath: null,
@@ -62,5 +76,8 @@ export const useVideoStore = create<VideoStore>((set) => ({
       outputResolutionPercent: 100,
       isProcessing: false,
       progress: 0,
+      currentTime: 0,
+      timelineZoom: 1.0,
+      playbackSpeed: 1.0,
     }),
 }));

@@ -13,7 +13,14 @@ function parseHMS(hms) {
   return parseInt(H, 10) * 3600 + parseInt(M, 10) * 60 + parseFloat(S);
 }
 function getFFmpegPath() {
-  const bundledPath = path.join(process.resourcesPath, "bin", "linux", "ffmpeg");
+  const platform = process.platform === "win32" ? "win" : "linux";
+  const execName = process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg";
+  const bundledPath = path.join(
+    process.resourcesPath,
+    "bin",
+    platform,
+    execName
+  );
   if (fs.existsSync(bundledPath)) {
     console.log("Using bundled FFmpeg:", bundledPath);
     return bundledPath;
@@ -24,13 +31,21 @@ function getFFmpegPath() {
 async function runFFmpeg(options) {
   return new Promise((resolve, reject) => {
     var _a, _b, _c, _d;
-    const { inputPath, outputPath, startTime, endTime, scaleToHeight } = options;
+    const {
+      inputPath,
+      outputPath,
+      startTime,
+      endTime,
+      scaleToHeight,
+      playbackSpeed
+    } = options;
     const duration = Math.max(0, endTime - startTime);
     if (duration <= 0) {
       return reject(
         new Error("Invalid trim duration (endTime must be > startTime).")
       );
     }
+    const adjustedDuration = playbackSpeed && playbackSpeed !== 1 ? duration / playbackSpeed : duration;
     const args = [
       "-hide_banner",
       "-nostats",
@@ -43,24 +58,58 @@ async function runFFmpeg(options) {
       "-i",
       inputPath
     ];
+    const videoFilters = [];
+    const audioFilters = [];
     if (scaleToHeight) {
-      const scaleExpr = `scale=ceil(iw/2)*2:${scaleToHeight}`;
+      videoFilters.push(`scale=ceil(iw/2)*2:${scaleToHeight}`);
+    }
+    if (playbackSpeed && playbackSpeed !== 1) {
+      videoFilters.push(`setpts=${(1 / playbackSpeed).toFixed(3)}*PTS`);
+      let remainingSpeed = playbackSpeed;
+      while (remainingSpeed > 2) {
+        audioFilters.push("atempo=2.0");
+        remainingSpeed /= 2;
+      }
+      while (remainingSpeed < 0.5) {
+        audioFilters.push("atempo=0.5");
+        remainingSpeed *= 2;
+      }
+      if (remainingSpeed !== 1) {
+        audioFilters.push(`atempo=${remainingSpeed.toFixed(3)}`);
+      }
+    }
+    if (videoFilters.length > 0) {
       args.push(
         "-vf",
-        scaleExpr,
+        videoFilters.join(","),
         "-c:v",
         "libx264",
         "-pix_fmt",
-        "yuv420p",
-        "-c:a",
-        "copy"
+        "yuv420p"
       );
     } else {
-      args.push("-c", "copy");
+      args.push("-c:v", "copy");
+    }
+    if (audioFilters.length > 0) {
+      args.push("-af", audioFilters.join(","));
+    } else {
+      args.push("-c:a", "copy");
     }
     args.push("-progress", "pipe:1", "-nostdin", "-y", outputPath);
     const ffmpegPath = getFFmpegPath();
     console.log("Running FFmpeg command:", [ffmpegPath, ...args].join(" "));
+    console.log(
+      "Playback speed:",
+      playbackSpeed,
+      "type:",
+      typeof playbackSpeed
+    );
+    console.log("Video filters:", videoFilters);
+    console.log("Audio filters:", audioFilters);
+    console.log(
+      "Speed condition check:",
+      playbackSpeed && playbackSpeed !== 1
+    );
     const ffmpeg = spawn(ffmpegPath, args, {
       stdio: ["ignore", "pipe", "pipe"]
     });
@@ -95,10 +144,7 @@ async function runFFmpeg(options) {
       speedEWMA = speedEWMA === 0 ? throughput : alpha * throughput + (1 - alpha) * speedEWMA;
       const pct = Math.max(0, Math.min(100, relTime / duration * 100));
       const remaining = Math.max(0, duration - relTime);
-      const speedForEta = Math.max(
-        0.2,
-        Math.min(speedEWMA, scaleToHeight ? 6 : 5)
-      );
+      const speedForEta = Math.max(0.2, Math.min(speedEWMA, 6));
       const eta = Math.round(remaining / (speedForEta || 0.2));
       if (mainWindow && (pct - lastPct >= 1 || pct === 100)) {
         lastPct = pct;
@@ -121,7 +167,7 @@ async function runFFmpeg(options) {
         if (mainWindow) {
           const finalProgress = {
             progress: 100,
-            time: duration,
+            time: adjustedDuration,
             speed: Number(speedEWMA.toFixed(2)) || 1,
             eta: 0
           };
@@ -145,7 +191,15 @@ ${stderrBuffer || "No additional error info"}`
 async function handleClipVideo(params) {
   try {
     console.log("Clipping video with params:", params);
-    const { inputPath, outputPath, startTime, endTime, scaleToHeight } = params;
+    console.log("ClipVideo - playbackSpeed:", params.playbackSpeed);
+    const {
+      inputPath,
+      outputPath,
+      startTime,
+      endTime,
+      scaleToHeight,
+      playbackSpeed
+    } = params;
     if (!inputPath || !outputPath) {
       return {
         success: false,
@@ -163,7 +217,8 @@ async function handleClipVideo(params) {
       outputPath,
       startTime,
       endTime,
-      scaleToHeight
+      scaleToHeight,
+      playbackSpeed
     });
     console.log("Video clipping completed:", result);
     return result;
@@ -178,7 +233,8 @@ async function handleClipVideo(params) {
 async function handleExportVideo(params) {
   try {
     console.log("Exporting video with params:", params);
-    const { inputPath, startTime, endTime, scaleToHeight } = params;
+    console.log("ExportVideo - playbackSpeed:", params.playbackSpeed);
+    const { inputPath, startTime, endTime, scaleToHeight, playbackSpeed } = params;
     if (!inputPath) {
       return {
         success: false,
@@ -205,7 +261,7 @@ async function handleExportVideo(params) {
     if (result.canceled || !result.filePath) {
       return {
         success: false,
-        error: "Export cancelled by user"
+        cancelled: true
       };
     }
     const outputPath = result.filePath;
@@ -237,14 +293,16 @@ async function handleExportVideo(params) {
       outputPath,
       startTime,
       endTime,
-      scaleToHeight
+      scaleToHeight,
+      playbackSpeed
     });
     const clipResult = await handleClipVideo({
       inputPath,
       outputPath,
       startTime,
       endTime,
-      scaleToHeight
+      scaleToHeight,
+      playbackSpeed
     });
     console.log("handleClipVideo returned:", clipResult);
     return clipResult;

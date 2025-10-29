@@ -1,17 +1,18 @@
 import { useVideoStore } from "./store/useVideoStore";
 import { ipcClient } from "./services/ipcClient";
-import { VideoPlayer } from "./components/VideoPlayer";
-import { SettingsTabs } from "./components/SettingsTabs";
+import { VideoPlayer, VideoPlayerRef } from "./components/VideoPlayer";
+import { Timeline } from "./components/timeline/Timeline";
+import { SettingsPanel } from "./components/SettingsPanel";
 import { Button } from "./components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Toaster, toast } from "sonner";
 import "./App.css";
-import { Separator } from "@radix-ui/react-separator";
 
 function App() {
   const { videoPath, setVideoPath, setVideoMetadata, reset } = useVideoStore();
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState("");
+  const videoPlayerRef = useRef<VideoPlayerRef>(null);
 
   const handleImportVideo = async () => {
     setIsImporting(true);
@@ -46,6 +47,10 @@ function App() {
     toast.info("Reset to start over");
   };
 
+  const handleTimelineSeek = (time: number) => {
+    videoPlayerRef.current?.seekTo(time);
+  };
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -77,17 +82,17 @@ function App() {
   }, [isImporting, videoPath]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
-      <header className="border-b bg-card">
+      <header className="border-b border-gray-700 bg-gray-800">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">ClipForge</h1>
+            <h1 className="text-2xl font-bold text-white">ClipForge</h1>
             <div className="flex gap-2">
               <Button
                 onClick={handleImportVideo}
                 disabled={isImporting}
-                variant={videoPath ? "outline" : "default"}
+                variant="secondary"
                 title="Import a video file (Ctrl+O)"
               >
                 {isImporting
@@ -99,14 +104,14 @@ function App() {
               {videoPath && (
                 <Button
                   onClick={handleReset}
-                  variant="outline"
+                  variant="secondary"
                   title="Reset to start over"
                 >
                   Reset
                 </Button>
               )}
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 onClick={() =>
                   toast.info(
@@ -124,23 +129,30 @@ function App() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="space-y-6">
           {/* Error Display */}
           {error && (
-            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md">
-              <p className="text-destructive">{error}</p>
+            <div className="p-4 bg-red-900/20 border border-red-700 rounded-md">
+              <p className="text-red-400">{error}</p>
             </div>
           )}
 
           {/* Video Player */}
-          <VideoPlayer />
+          <VideoPlayer ref={videoPlayerRef} />
 
-          {/* Settings Tabs - Only show when video is loaded */}
+          {/* Timeline and Settings - Only show when video is loaded */}
           {videoPath && (
-            <>
-              <Separator orientation="vertical" className="py-4" />
-              <SettingsTabs />
-            </>
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Timeline - Takes up most of the space */}
+              <div className="lg:col-span-3">
+                <Timeline onSeek={handleTimelineSeek} />
+              </div>
+
+              {/* Settings Panel - Right sidebar */}
+              <div className="lg:col-span-1">
+                <SettingsPanel />
+              </div>
+            </div>
           )}
         </div>
       </main>

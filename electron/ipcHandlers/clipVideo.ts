@@ -6,8 +6,16 @@ export async function handleClipVideo(
 ): Promise<FFmpegResult> {
   try {
     console.log("Clipping video with params:", params);
+    console.log("ClipVideo - playbackSpeed:", params.playbackSpeed);
 
-    const { inputPath, outputPath, startTime, endTime, scaleToHeight } = params;
+    const {
+      inputPath,
+      outputPath,
+      startTime,
+      endTime,
+      scaleToHeight,
+      playbackSpeed,
+    } = params;
 
     // Validate parameters
     if (!inputPath || !outputPath) {
@@ -32,6 +40,7 @@ export async function handleClipVideo(
       startTime,
       endTime,
       scaleToHeight,
+      playbackSpeed,
     });
 
     console.log("Video clipping completed:", result);

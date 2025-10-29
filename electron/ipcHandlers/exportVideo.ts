@@ -9,8 +9,10 @@ export async function handleExportVideo(
 ): Promise<FFmpegResult> {
   try {
     console.log("Exporting video with params:", params);
+    console.log("ExportVideo - playbackSpeed:", params.playbackSpeed);
 
-    const { inputPath, startTime, endTime, scaleToHeight } = params;
+    const { inputPath, startTime, endTime, scaleToHeight, playbackSpeed } =
+      params;
 
     // Validate input parameters
     if (!inputPath) {
@@ -44,7 +46,7 @@ export async function handleExportVideo(
     if (result.canceled || !result.filePath) {
       return {
         success: false,
-        error: "Export cancelled by user",
+        cancelled: true,
       };
     }
 
@@ -83,6 +85,7 @@ export async function handleExportVideo(
       startTime,
       endTime,
       scaleToHeight,
+      playbackSpeed,
     });
 
     // Call clipVideo handler with the selected output path
@@ -92,6 +95,7 @@ export async function handleExportVideo(
       startTime,
       endTime,
       scaleToHeight,
+      playbackSpeed,
     });
 
     console.log("handleClipVideo returned:", clipResult);
