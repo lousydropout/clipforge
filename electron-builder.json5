@@ -29,7 +29,7 @@
 
   // ----- Linux Builds -----
   linux: {
-    target: ["AppImage", "deb"],
+    target: ["AppImage"],
     category: "Video",
     icon: "assets/icons/png/",
     executableName: "clipforge",
