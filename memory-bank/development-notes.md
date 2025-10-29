@@ -4,6 +4,9 @@
 
 ### 2025-01-29
 
+- **Epic 10 Completion**: Implemented Welcome Screen with three separate workflow components (Import Video, Screen Recording, Screen + Overlay)
+- **Timeline UI Enhancement**: Updated VideoTrack component to show full video "tape" at low opacity with selected portion highlighted
+- **File Path Export Fix**: Fixed critical "Input video file not found" error by properly converting file:// URLs to file system paths
 - **Recording System Overhaul**: Replaced custom MediaRecorder implementation with `react-media-recorder` library
 - **Screen Recording Audio Fix**: Implemented separate video/audio stream capture and merging for system audio
 - **Source Selection Dialog**: Added Electron `desktopCapturer` integration for screen/window source selection
@@ -40,6 +43,7 @@
 - ✅ Epic 7 Complete: UI Enhancements (doubled video player, tabbed settings)
 - ✅ Epic 8 Complete: Data Structure Upgrade (two-track architecture foundation)
 - ✅ Epic 9 Complete: Screen Recording & Camera Overlay System
+- ✅ Epic 10 Complete: Import Video Flow (Editor Core) with Welcome Screen
 - ✅ Context isolation enabled, node integration disabled
 - ✅ Type-safe API interface available in renderer
 - ✅ Real video metadata extraction using FFprobe
@@ -50,8 +54,10 @@
 - ✅ Source selection dialog for screen/window capture
 - ✅ Live preview system for recording sources
 - ✅ WebM recording with optimized export workflow
+- ✅ Welcome Screen with three workflow options (Import, Screen, Screen+Overlay)
+- ✅ Separate editor components for each workflow
 - ✅ Development server running with hot reload
-- 🚧 Ready for Epic 10: Advanced Recording Features & Polish
+- 🚧 Ready for Epic 11: Screen-Only Recording Flow
 
 ## MVP Checklist
 
@@ -66,7 +72,74 @@
 - [x] Source selection for screen/window capture
 - [x] Two-track recording system (main + overlay)
 
-## Next Development Steps
+## Upcoming Epic Plans
+
+### Epic 10: Import Video Flow (Editor Core) ✅ COMPLETED
+
+**Goal**: Implement the base editing workspace that all recordings feed into.
+
+**Current Status**: Complete with Welcome Screen entry point and three separate workflow components
+
+**Tasks**:
+- [x] Add Welcome Screen as entry point
+- [x] Simplify current editor for single-track editing
+- [x] Ensure import & metadata extraction works
+- [x] Verify video preview with play/pause/scrub
+- [x] Confirm timeline editor with trim handles
+- [x] Test adjustments panel (speed, resolution)
+- [x] Validate export workflow
+
+**Epic 10 Completion Summary**:
+- **Welcome Screen**: Created main entry point with three workflow options (Import Video, Screen Recording, Screen + Overlay)
+- **Import Video Editor**: Dedicated component for editing imported videos with full timeline and export functionality
+- **Screen Recording Editor**: Self-contained screen recording workflow with preview and post-recording editing
+- **Screen + Overlay Editor**: Dual recording workflow for screen + camera with PiP preparation
+- **Timeline UI Enhancement**: Updated VideoTrack to show full video "tape" at low opacity with selected portion highlighted
+- **File Path Export Fix**: Resolved critical export error by properly converting file:// URLs to file system paths
+- **Workflow Management**: Added `currentWorkflow` state to store for navigation between components
+- **Component Architecture**: Each workflow is self-contained with duplicated logic for simplicity
+- **Navigation**: Simple state-based routing with "Back to Welcome" buttons
+- **Build Status**: All components compile successfully with no TypeScript errors
+
+### Epic 11: Screen-Only Recording Flow 📋 PLANNED
+
+**Goal**: Let users record screen with microphone, save locally, auto-open in editor.
+
+**Tasks**:
+- [ ] Simplify current screen recording system
+- [ ] Implement source selection via `desktopCapturer.getSources()`
+- [ ] Add mic input selector from `enumerateDevices()`
+- [ ] Use `getDisplayMedia` for video + `getUserMedia` for mic
+- [ ] Combine tracks into single `MediaStream`
+- [ ] Add post-recording processing overlay
+- [ ] Implement auto-redirect to editor
+- [ ] Handle audio track missing warnings
+
+### Epic 12: Screen + Overlay Recording Flow 📋 PLANNED
+
+**Goal**: Record screen and webcam simultaneously, create PiP video, import to editor.
+
+**Tasks**:
+- [ ] Implement dual source setup (screen + camera)
+- [ ] Add live preview with webcam thumbnail overlay
+- [ ] Create dual recording logic (separate `MediaRecorder` streams)
+- [ ] Implement FFmpeg PiP merging post-processing
+- [ ] Add PiP size/position controls
+- [ ] Auto-redirect merged clip to editor
+
+### Epic 13: AI Auto-Muting (Filler-Word Removal) 📋 PLANNED
+
+**Goal**: Optional AI processing to identify and mute filler words using Whisper + GPT.
+
+**Tasks**:
+- [ ] Implement audio extraction via FFmpeg
+- [ ] Add Whisper API integration for transcription
+- [ ] Create GPT-4.1-mini integration for filler detection
+- [ ] Implement FFmpeg mute processing
+- [ ] Add "Auto-mute filler words" toggle in editor
+- [ ] Integrate AI pipeline with export workflow
+
+## Completed Development Phases
 
 ### Phase 1: Core Infrastructure ✅ COMPLETED
 
@@ -148,6 +221,34 @@
 
 - None currently identified
 
+## Bug Fixes
+
+### File Path Export Issue (2025-01-29)
+
+**Problem**: "Input video file not found" error during export, even when video file exists.
+
+**Root Cause**: File URL conversion was removing the leading slash from file paths:
+- Video import stores paths as `file:///path/to/video.mp4` URLs (for security)
+- Export handler was converting to `path/to/video.mp4` (missing leading slash)
+- `statSync()` and FFmpeg couldn't find the file
+
+**Solution**: Updated `fileUrlToPath()` function in `electron/ipcHandlers/exportVideo.ts`:
+```typescript
+function fileUrlToPath(fileUrl: string): string {
+  if (fileUrl.startsWith('file://')) {
+    const path = fileUrl.replace(/^file:\/\/+/, '');
+    return path.startsWith('/') ? path : '/' + path;
+  }
+  return fileUrl;
+}
+```
+
+**Result**: 
+- ✅ Proper path conversion: `file:///path/to/video.mp4` → `/path/to/video.mp4`
+- ✅ File existence checks work correctly
+- ✅ FFmpeg receives valid file paths
+- ✅ Export functionality restored
+
 ## Recording System Architecture
 
 ### Audio Sources
@@ -169,6 +270,35 @@
 - **RecordButton**: Start/stop recording button
 - **PreviewService**: Centralized stream management for live previews
 - **VideoPlayerWithControls**: Displays both recorded videos and live previews
+
+## Overall App Flow (Planned)
+
+```
+Welcome Screen
+ ├── Import Video  →  Epic 10 (Editor Core)
+ ├── Screen Only   →  Epic 11  →  Editor (Epic 10)
+ └── Screen+Overlay→  Epic 12  →  Editor (Epic 10)
+                               ↘ (optional) Epic 13 (AI Muting)
+```
+
+## Current System vs. Planned Epics Alignment
+
+### What's Already Built ✅
+- **Epic 10 (Editor Core)**: 90% complete - has video import, preview, timeline, trim controls, speed/resolution adjustments, export
+- **Epic 11 (Screen Recording)**: 80% complete - has screen recording with audio, but needs simplification
+- **Epic 12 (Screen + Overlay)**: 60% complete - has two-track system, but needs PiP merging instead
+
+### What Needs to be Added/Modified 🔄
+- **Welcome Screen**: New entry point needed
+- **Epic 11 Simplification**: Current system is more complex than needed
+- **Epic 12 PiP Merging**: Current two-track approach needs to change to PiP merging
+- **Epic 13 AI Muting**: Completely new feature
+
+### Key Architectural Changes Needed
+1. **Welcome Screen**: Add as main entry point before current editor
+2. **Single-Track Editor**: Simplify current two-track system for Epic 10
+3. **PiP Processing**: Replace two-track recording with FFmpeg PiP merging for Epic 12
+4. **AI Integration**: Add Whisper + GPT pipeline for Epic 13
 
 ## Development Environment
 

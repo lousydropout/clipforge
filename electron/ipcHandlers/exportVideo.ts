@@ -4,6 +4,18 @@ import { ExportVideoRequest, FFmpegResult } from "../types";
 import path from "path";
 import { statSync } from "fs";
 
+// Helper function to convert file:// URL to regular file path
+function fileUrlToPath(fileUrl: string): string {
+  // Handle both file:// and file:/// protocols
+  if (fileUrl.startsWith('file://')) {
+    // Remove file:// protocol, handle both file:// and file:/// cases
+    const path = fileUrl.replace(/^file:\/\/+/, '');
+    // Ensure we have a leading slash for absolute paths
+    return path.startsWith('/') ? path : '/' + path;
+  }
+  return fileUrl;
+}
+
 export async function handleExportVideo(
   params: ExportVideoRequest
 ): Promise<FFmpegResult> {
@@ -14,8 +26,13 @@ export async function handleExportVideo(
     const { inputPath, startTime, endTime, scaleToHeight, playbackSpeed } =
       params;
 
+    // Convert file:// URL to regular file path
+    const actualInputPath = fileUrlToPath(inputPath);
+    console.log("Original inputPath:", inputPath);
+    console.log("Converted inputPath:", actualInputPath);
+
     // Validate input parameters
-    if (!inputPath) {
+    if (!actualInputPath) {
       return {
         success: false,
         error: "Input path is required",
@@ -33,7 +50,7 @@ export async function handleExportVideo(
     // Show save dialog to let user choose output location
     const result = await dialog.showSaveDialog({
       title: "Save Trimmed Video",
-      defaultPath: generateDefaultFilename(inputPath),
+      defaultPath: generateDefaultFilename(actualInputPath),
       filters: [
         {
           name: "Video Files",
@@ -54,7 +71,7 @@ export async function handleExportVideo(
 
     // Check if input file still exists
     try {
-      statSync(inputPath);
+      statSync(actualInputPath);
     } catch (error) {
       return {
         success: false,
@@ -80,7 +97,7 @@ export async function handleExportVideo(
     }
 
     console.log("Calling handleClipVideo with params:", {
-      inputPath,
+      inputPath: actualInputPath,
       outputPath,
       startTime,
       endTime,
@@ -90,7 +107,7 @@ export async function handleExportVideo(
 
     // Call clipVideo handler with the selected output path
     const clipResult = await handleClipVideo({
-      inputPath,
+      inputPath: actualInputPath,
       outputPath,
       startTime,
       endTime,

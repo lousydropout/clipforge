@@ -28,6 +28,9 @@ interface ProjectStore {
   // Project data
   project: Project | null;
 
+  // Workflow state
+  currentWorkflow: 'welcome' | 'import' | 'screen' | 'overlay' | null;
+
   // Processing state
   isProcessing: boolean;
   progress: number;
@@ -44,6 +47,7 @@ interface ProjectStore {
 
   // Actions
   setProject: (project: Project | null) => void;
+  setWorkflow: (workflow: 'welcome' | 'import' | 'screen' | 'overlay' | null) => void;
   updateTrack: (type: "main" | "overlay", updates: Partial<VideoTrack>) => void;
   setMainTrack: (track: VideoTrack) => void;
   setOverlayTrack: (track: VideoTrack | null) => void;
@@ -61,6 +65,7 @@ interface ProjectStore {
 export const useProjectStore = create<ProjectStore>((set, get) => ({
   // Initial state
   project: null,
+  currentWorkflow: 'welcome',
   isProcessing: false,
   progress: 0,
   currentTime: 0,
@@ -72,6 +77,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
 
   // Actions
   setProject: (project) => set({ project }),
+  setWorkflow: (workflow) => set({ currentWorkflow: workflow }),
   
   updateTrack: (type, updates) => {
     const { project } = get();
@@ -138,6 +144,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   reset: () =>
     set({
       project: null,
+      currentWorkflow: 'welcome',
       isProcessing: false,
       progress: 0,
       currentTime: 0,

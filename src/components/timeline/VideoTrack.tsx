@@ -95,9 +95,19 @@ export function VideoTrack({ duration, width, onSeek }: VideoTrackProps) {
       style={{ width: `${width}px` }}
       onClick={handleTrackClick}
     >
-      {/* Video clip */}
+      {/* Full video tape (untrimmed) - low opacity background */}
       <div
-        className="absolute top-2 bg-blue-600 rounded-sm flex items-center justify-center text-white text-sm font-medium opacity-50"
+        className="absolute top-2 bg-blue-600 rounded-sm opacity-20"
+        style={{
+          left: `0px`,
+          width: `${width}px`,
+          height: `48px`,
+        }}
+      />
+
+      {/* Selected portion (between trim handles) - higher opacity */}
+      <div
+        className="absolute top-2 bg-blue-600 rounded-sm flex items-center justify-center text-white text-sm font-medium opacity-80"
         style={{
           left: `${startPosition}px`,
           width: `${clipWidth}px`,

@@ -232,12 +232,22 @@ async function handleClipVideo(params) {
     };
   }
 }
+function fileUrlToPath(fileUrl) {
+  if (fileUrl.startsWith("file://")) {
+    const path2 = fileUrl.replace(/^file:\/\/+/, "");
+    return path2.startsWith("/") ? path2 : "/" + path2;
+  }
+  return fileUrl;
+}
 async function handleExportVideo(params) {
   try {
     console.log("Exporting video with params:", params);
     console.log("ExportVideo - playbackSpeed:", params.playbackSpeed);
     const { inputPath, startTime, endTime, scaleToHeight, playbackSpeed } = params;
-    if (!inputPath) {
+    const actualInputPath = fileUrlToPath(inputPath);
+    console.log("Original inputPath:", inputPath);
+    console.log("Converted inputPath:", actualInputPath);
+    if (!actualInputPath) {
       return {
         success: false,
         error: "Input path is required"
@@ -251,7 +261,7 @@ async function handleExportVideo(params) {
     }
     const result = await dialog.showSaveDialog({
       title: "Save Trimmed Video",
-      defaultPath: generateDefaultFilename(inputPath),
+      defaultPath: generateDefaultFilename(actualInputPath),
       filters: [
         {
           name: "Video Files",
@@ -268,7 +278,7 @@ async function handleExportVideo(params) {
     }
     const outputPath = result.filePath;
     try {
-      statSync(inputPath);
+      statSync(actualInputPath);
     } catch (error) {
       return {
         success: false,
@@ -291,7 +301,7 @@ async function handleExportVideo(params) {
       };
     }
     console.log("Calling handleClipVideo with params:", {
-      inputPath,
+      inputPath: actualInputPath,
       outputPath,
       startTime,
       endTime,
@@ -299,7 +309,7 @@ async function handleExportVideo(params) {
       playbackSpeed
     });
     const clipResult = await handleClipVideo({
-      inputPath,
+      inputPath: actualInputPath,
       outputPath,
       startTime,
       endTime,
