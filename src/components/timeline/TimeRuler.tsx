@@ -2,15 +2,10 @@ import { useMemo } from "react";
 
 interface TimeRulerProps {
   duration: number;
-  pixelsPerSecond: number;
   width: number;
 }
 
-export function TimeRuler({
-  duration,
-  pixelsPerSecond,
-  width,
-}: TimeRulerProps) {
+export function TimeRuler({ duration, width }: TimeRulerProps) {
   const timeMarkers = useMemo(() => {
     if (duration <= 0) return [];
 

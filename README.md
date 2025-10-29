@@ -1,21 +1,25 @@
-# ClipForge - Video Trimmer
+# ClipForge - Professional Video Editor
 
 ## Overview
 
-ClipForge is a lightweight desktop video editing application built with Electron, React, and FFmpeg. It provides a simple and intuitive interface for importing, trimming, and exporting video clips without the complexity of full-featured video editors.
+ClipForge is a professional desktop video editing application built with Electron, React, and FFmpeg. It features a modern dark theme interface with an interactive timeline, making it perfect for quick video trimming, speed adjustments, and professional-quality exports.
 
 ## Features
 
 ### Core Functionality
 
 - **Import Video** - Open file picker to select video files (MP4, AVI, MOV, MKV, WebM)
-- **Video Preview** - Native HTML5 video player with controls
-- **Trim Controls** - Set start and end times with visual timeline slider
-- **Export Video** - Save trimmed clips with automatic resolution scaling
-- **Real-time Progress** - Live progress tracking with ETA and processing speed
+- **Professional Video Player** - Large preview window with native HTML5 controls
+- **Interactive Timeline** - Drag-to-scrub playhead with visual trim handles
+- **Speed Control** - Adjust playback speed from 0.5x to 2x (affects both preview and export)
+- **Resolution Scaling** - Export at custom resolutions (25% to 200% of original)
+- **Export Video** - Save trimmed clips with real-time progress tracking
 
 ### User Experience
 
+- **Dark Theme Interface** - Professional video editor appearance
+- **Interactive Timeline** - Drag playhead to scrub, drag trim handles to adjust selection
+- **Timeline Zoom** - Zoom in/out to focus on specific time ranges
 - **Keyboard Shortcuts** - Quick access to common functions
 - **Toast Notifications** - Clear feedback for all operations
 - **Loading States** - Skeleton loaders and progress indicators
@@ -26,6 +30,8 @@ ClipForge is a lightweight desktop video editing application built with Electron
 
 - **Secure IPC** - Context isolation with channel whitelist
 - **Real FFmpeg Integration** - Actual video processing with progress parsing
+- **Speed Filters** - FFmpeg setpts/atempo filters for accurate speed changes
+- **Bundled FFmpeg** - Self-contained Linux builds with static binaries
 - **Type Safety** - Full TypeScript support throughout
 - **Performance Optimized** - Memoized components and debounced inputs
 
@@ -63,13 +69,20 @@ clipforge-electron/
 ├── src/
 │   ├── components/
 │   │   ├── VideoPlayer.tsx
-│   │   ├── TrimControls.tsx
-│   │   └── ExportDialog.tsx
+│   │   ├── ResolutionControls.tsx
+│   │   ├── ExportDialog.tsx
+│   │   ├── SettingsPanel.tsx
+│   │   ├── timeline/
+│   │   │   ├── Timeline.tsx
+│   │   │   ├── TimeRuler.tsx
+│   │   │   ├── VideoTrack.tsx
+│   │   │   ├── Playhead.tsx
+│   │   │   └── TimelineControls.tsx
+│   │   └── ui/              # shadcn/ui components
 │   ├── store/
 │   │   └── useVideoStore.ts
 │   ├── services/
-│   │   ├── ipcClient.ts     # Wrapper for calling IPC events
-│   │   └── ffmpeg.ts        # Frontend-side API stubs
+│   │   └── ipcClient.ts     # Wrapper for calling IPC events
 │   └── App.tsx
 │
 ├── package.json
@@ -141,12 +154,18 @@ export function runFFmpeg(args: string[]): Promise<string> {
 
 ---
 
-## Example FFmpeg Command
+## Example FFmpeg Commands
 
 Trim video from 10s to 25s and resize to 720p:
 
 ```bash
 ffmpeg -ss 10 -to 25 -i input.mp4 -vf "scale=-1:720" -c:a copy output.mp4
+```
+
+Trim with 2x speed increase:
+
+```bash
+ffmpeg -ss 10 -to 25 -i input.mp4 -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]" output.mp4
 ```
 
 Same resolution (no scaling):
@@ -165,6 +184,8 @@ ffmpeg -ss 10 -to 25 -i input.mp4 -c copy output.mp4
 - `Left/Right Arrow` - Adjust start time by 1 second
 - `Up/Down Arrow` - Adjust end time by 1 second
 - `Shift + Arrow Keys` - Adjust by 10 seconds
+- `Mouse Drag` - Drag playhead to scrub timeline
+- `Mouse Drag` - Drag trim handles to adjust selection
 
 ## Installation & Setup
 
@@ -194,8 +215,8 @@ bun run build
 
 # Build for specific platforms
 bun run build:linux    # Linux AppImage and DEB
-bun run build:win      # Windows NSIS and portable
-bun run build:mac      # macOS DMG
+bun run build:win      # Windows NSIS and portable (UNTESTED)
+bun run build:mac      # macOS DMG (UNTESTED)
 
 # Build without publishing
 bun run dist
@@ -214,6 +235,7 @@ The build process creates the following artifacts in the `dist/` directory:
 The application includes bundled FFmpeg binaries for Linux, eliminating the need for users to install FFmpeg separately. The binaries are automatically extracted and configured during the build process.
 
 **Bundled FFmpeg Details:**
+
 - Source: Static builds from johnvansickle.com
 - License: GPL v3 (included in `bin/linux/`)
 - Size: ~80MB per platform
@@ -277,8 +299,15 @@ choco install ffmpeg
 ### Completed Features ✅
 
 - [x] Import and preview video
-- [x] Input start/end timestamps with visual timeline
+- [x] Professional dark theme interface
+- [x] Interactive timeline with draggable playhead
+- [x] Visual trim handles for precise selection
+- [x] Timeline zoom controls (25% to 400%)
+- [x] Playback speed control (0.5x to 2x)
+- [x] Resolution scaling (25% to 200%)
 - [x] Real FFmpeg integration with progress tracking
+- [x] Speed filters (setpts/atempo) for accurate exports
+- [x] Bundled FFmpeg binaries for Linux
 - [x] Export to chosen folder with automatic scaling
 - [x] Enhanced progress display with ETA and speed
 - [x] Toast notifications for user feedback

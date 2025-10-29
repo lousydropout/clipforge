@@ -13,10 +13,9 @@ export interface VideoPlayerRef {
   getCurrentTime: () => number;
 }
 
-export const VideoPlayer = forwardRef<VideoPlayerRef>((props, ref) => {
+export const VideoPlayer = forwardRef<VideoPlayerRef>((_props, ref) => {
   const videoPath = useVideoStore((state) => state.videoPath);
   const videoMetadata = useVideoStore((state) => state.videoMetadata);
-  const currentTime = useVideoStore((state) => state.currentTime);
   const setCurrentTime = useVideoStore((state) => state.setCurrentTime);
   const playbackSpeed = useVideoStore((state) => state.playbackSpeed);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -190,9 +189,6 @@ export const VideoPlayer = forwardRef<VideoPlayerRef>((props, ref) => {
               <span>
                 {videoMetadata.width} × {videoMetadata.height}
               </span>
-            </div>
-            <div className="text-sm text-gray-400">
-              Format: {videoMetadata.format}
             </div>
           </div>
         )}

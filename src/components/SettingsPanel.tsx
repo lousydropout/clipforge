@@ -8,7 +8,7 @@ export function SettingsPanel() {
       {/* Resolution Controls */}
       <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle className="text-white">Output Resolution</CardTitle>
+          <CardTitle className="text-white">Controls</CardTitle>
         </CardHeader>
         <CardContent>
           <ResolutionControls />

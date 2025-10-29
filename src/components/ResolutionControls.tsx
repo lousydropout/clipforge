@@ -1,6 +1,5 @@
 import { Slider } from "./ui/slider";
 import { useVideoStore } from "../store/useVideoStore";
-import { useMemo } from "react";
 
 export function ResolutionControls() {
   const videoMetadata = useVideoStore((state) => state.videoMetadata);
@@ -12,16 +11,6 @@ export function ResolutionControls() {
   );
   const playbackSpeed = useVideoStore((state) => state.playbackSpeed);
   const setPlaybackSpeed = useVideoStore((state) => state.setPlaybackSpeed);
-
-  const outputResolution = useMemo(() => {
-    if (!videoMetadata) return { width: 0, height: 0 };
-
-    const scale = outputResolutionPercent / 100;
-    return {
-      width: Math.round(videoMetadata.width * scale),
-      height: Math.round(videoMetadata.height * scale),
-    };
-  }, [videoMetadata, outputResolutionPercent]);
 
   if (!videoMetadata) {
     return (
@@ -72,15 +61,6 @@ export function ResolutionControls() {
         <div className="flex justify-between text-xs text-gray-400">
           <span>0.5x</span>
           <span>2x</span>
-        </div>
-      </div>
-
-      <div className="text-sm text-gray-400">
-        <div className="flex justify-between">
-          <span>Output:</span>
-          <span>
-            {outputResolution.width} × {outputResolution.height}
-          </span>
         </div>
       </div>
     </div>

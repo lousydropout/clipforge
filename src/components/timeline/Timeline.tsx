@@ -45,11 +45,7 @@ export function Timeline({ onSeek }: TimelineProps) {
       {/* Timeline Container */}
       <div className="bg-gray-900 border border-gray-700 rounded-lg overflow-x-auto">
         {/* Time Ruler */}
-        <TimeRuler
-          duration={videoMetadata.duration}
-          pixelsPerSecond={pixelsPerSecond}
-          width={timelineWidth}
-        />
+        <TimeRuler duration={videoMetadata.duration} width={timelineWidth} />
 
         {/* Video Track */}
         <div className="relative pb-4">
@@ -69,17 +65,4 @@ export function Timeline({ onSeek }: TimelineProps) {
       </div>
     </div>
   );
-}
-
-function formatTime(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = Math.floor(seconds % 60);
-
-  if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
-  }
-  return `${minutes}:${secs.toString().padStart(2, "0")}`;
 }
