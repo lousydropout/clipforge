@@ -1,4 +1,5 @@
 import { VideoMetadata } from "../store/useProjectStore";
+import { SaveRecordingRequest, SaveRecordingResponse } from "../../electron/types";
 
 export interface ImportVideoResponse {
   success: boolean;
@@ -95,5 +96,63 @@ export const ipcClient = {
   // Remove progress listener
   offProgress(callback: (progress: FFmpegProgress) => void): void {
     window.api.off("ffmpeg.progress", callback);
+  },
+
+  // Recording methods
+
+  async saveRecording(buffer: ArrayBuffer, filename: string): Promise<string> {
+    try {
+      const params: SaveRecordingRequest = { buffer, filename };
+      const result: SaveRecordingResponse = await window.api.invoke("recording.saveFile", params);
+      
+      if (!result.success || !result.filePath) {
+        throw new Error(result.error || "Failed to save recording");
+      }
+      
+      return result.filePath;
+    } catch (error) {
+      console.error("Failed to save recording:", error);
+      throw new Error("Failed to save recording");
+    }
+  },
+
+  async getRecordingMetadata(path: string): Promise<VideoMetadata> {
+    try {
+      const result = await window.api.invoke("recording.getMetadata", path);
+      return result;
+    } catch (error) {
+      console.error("Failed to get recording metadata:", error);
+      throw new Error("Failed to get recording metadata");
+    }
+  },
+
+  async convertWebmToMp4(webmPath: string, mp4Filename: string): Promise<string> {
+    try {
+      const result = await window.api.invoke("recording.convertWebmToMp4", { webmPath, mp4Filename });
+      return result;
+    } catch (error) {
+      console.error("Failed to convert WebM to MP4:", error);
+      throw new Error("Failed to convert WebM to MP4");
+    }
+  },
+
+  async getSources(): Promise<{ id: string; name: string; thumbnail: string }[]> {
+    try {
+      const result = await window.api.invoke("recording.getSources");
+      return result;
+    } catch (error) {
+      console.error("Failed to get sources:", error);
+      throw new Error("Failed to get sources");
+    }
+  },
+
+  async showSourceDialog(): Promise<string | null> {
+    try {
+      const result = await window.api.invoke("recording.showSourceDialog");
+      return result;
+    } catch (error) {
+      console.error("Failed to show source dialog:", error);
+      throw new Error("Failed to show source dialog");
+    }
   },
 };

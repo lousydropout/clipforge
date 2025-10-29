@@ -1,9 +1,9 @@
-import { ipcRenderer, contextBridge } from "electron";
+import { ipcRenderer, contextBridge, desktopCapturer } from "electron";
 
 // --------- Expose secure API to the Renderer process ---------
 contextBridge.exposeInMainWorld("api", {
   invoke: (channel: string, args?: any) => {
-    const validChannels = ["video.import", "video.clip", "video.export"];
+    const validChannels = ["video.import", "video.clip", "video.export", "recording.getSources", "recording.showSourceDialog", "recording.saveFile", "recording.getMetadata", "recording.convertWebmToMp4"];
     if (validChannels.includes(channel)) {
       return ipcRenderer.invoke(channel, args);
     }
@@ -20,5 +20,17 @@ contextBridge.exposeInMainWorld("api", {
     if (validChannels.includes(channel)) {
       ipcRenderer.off(channel, callback);
     }
+  },
+  
+  // Desktop capturer for screen recording
+  desktopCapturer: {
+    getSources: (options: any) => {
+      try {
+        return desktopCapturer.getSources(options);
+      } catch (error) {
+        console.error("desktopCapturer.getSources failed:", error);
+        throw error;
+      }
+    },
   },
 });

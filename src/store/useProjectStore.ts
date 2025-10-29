@@ -37,6 +37,11 @@ interface ProjectStore {
   timelineZoom: number;
   playbackSpeed: number;
 
+  // Recording state
+  isRecordingScreen: boolean;
+  isRecordingCamera: boolean;
+  recordingStartTime: number | null;
+
   // Actions
   setProject: (project: Project | null) => void;
   updateTrack: (type: "main" | "overlay", updates: Partial<VideoTrack>) => void;
@@ -47,6 +52,9 @@ interface ProjectStore {
   setCurrentTime: (time: number) => void;
   setTimelineZoom: (zoom: number) => void;
   setPlaybackSpeed: (speed: number) => void;
+  setRecordingScreen: (recording: boolean) => void;
+  setRecordingCamera: (recording: boolean) => void;
+  setRecordingStartTime: (time: number | null) => void;
   reset: () => void;
 }
 
@@ -58,6 +66,9 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   currentTime: 0,
   timelineZoom: 1.0,
   playbackSpeed: 1.0,
+  isRecordingScreen: false,
+  isRecordingCamera: false,
+  recordingStartTime: null,
 
   // Actions
   setProject: (project) => set({ project }),
@@ -120,6 +131,9 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   setCurrentTime: (time) => set({ currentTime: time }),
   setTimelineZoom: (zoom) => set({ timelineZoom: zoom }),
   setPlaybackSpeed: (speed) => set({ playbackSpeed: speed }),
+  setRecordingScreen: (recording) => set({ isRecordingScreen: recording }),
+  setRecordingCamera: (recording) => set({ isRecordingCamera: recording }),
+  setRecordingStartTime: (time) => set({ recordingStartTime: time }),
   
   reset: () =>
     set({
@@ -129,5 +143,8 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       currentTime: 0,
       timelineZoom: 1.0,
       playbackSpeed: 1.0,
+      isRecordingScreen: false,
+      isRecordingCamera: false,
+      recordingStartTime: null,
     }),
 }));

@@ -4,6 +4,7 @@ import path from "node:path";
 import { spawn } from "child_process";
 import { handleClipVideo } from "./ipcHandlers/clipVideo";
 import { handleExportVideo } from "./ipcHandlers/exportVideo";
+import { handleSaveFile, getRecordingMetadata, handleConvertWebmToMp4, handleGetSources, showSourceSelectionDialog } from "./ipcHandlers/recordingHandlers";
 
 
 // --- existing code below this line stays unchanged ---
@@ -94,12 +95,16 @@ ipcMain.handle("video.import", async () => {
     const videoPath = result.filePaths[0];
     try {
       const metadata = await getVideoMetadata(videoPath);
-      return { success: true, videoPath, metadata };
+      // Convert file path to file:// URL for the renderer process
+      const videoUrl = `file://${videoPath}`;
+      return { success: true, videoPath: videoUrl, metadata };
     } catch (error) {
       console.error("Failed to extract video metadata:", error);
+      // Convert file path to file:// URL for the renderer process
+      const videoUrl = `file://${videoPath}`;
       return {
         success: true,
-        videoPath,
+        videoPath: videoUrl,
         metadata: {
           duration: 0,
           width: 0,
@@ -120,6 +125,13 @@ ipcMain.handle("video.import", async () => {
 
 ipcMain.handle("video.clip", async (_, params) => handleClipVideo(params));
 ipcMain.handle("video.export", async (_, params) => handleExportVideo(params));
+
+// Recording handlers
+ipcMain.handle("recording.saveFile", async (_, params) => handleSaveFile(params));
+ipcMain.handle("recording.getMetadata", async (_, path) => getRecordingMetadata(path));
+ipcMain.handle("recording.convertWebmToMp4", async (_, params) => handleConvertWebmToMp4(params));
+ipcMain.handle("recording.getSources", async () => handleGetSources());
+ipcMain.handle("recording.showSourceDialog", async () => showSourceSelectionDialog());
 
 async function getVideoMetadata(videoPath: string): Promise<any> {
   return new Promise((resolve, reject) => {

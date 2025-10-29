@@ -43,3 +43,21 @@ export interface ExportVideoRequest {
   scaleToHeight?: number;
   playbackSpeed?: number;
 }
+
+// Recording-related interfaces
+export interface RecordingSource {
+  id: string;
+  name: string;
+  thumbnail: string;
+}
+
+export interface SaveRecordingRequest {
+  buffer: ArrayBuffer;
+  filename: string;
+}
+
+export interface SaveRecordingResponse {
+  success: boolean;
+  filePath?: string;
+  error?: string;
+}

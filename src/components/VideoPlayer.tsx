@@ -54,6 +54,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef>((_props, ref) => {
   // Reset loading state when video path changes
   useEffect(() => {
     if (videoPath) {
+      console.log("VideoPlayer: Video path changed to:", videoPath);
       setIsLoading(true);
     }
   }, [videoPath]);
@@ -157,17 +158,26 @@ export const VideoPlayer = forwardRef<VideoPlayerRef>((_props, ref) => {
         <div className="relative">
           <video
             ref={videoRef}
-            src={
-              videoPath.startsWith("file://")
+            src={(() => {
+              const finalSrc = videoPath.startsWith("file://")
                 ? videoPath
-                : `file://${videoPath}`
-            }
+                : `file://${videoPath}`;
+              console.log("VideoPlayer: Final video src:", finalSrc);
+              return finalSrc;
+            })()}
             controls
             className="w-full h-128 object-contain bg-black rounded-t-lg"
             preload="metadata"
             aria-label="Video player"
-            onLoadedData={() => setIsLoading(false)}
-            onError={() => setIsLoading(false)}
+            onLoadedData={() => {
+              console.log("VideoPlayer: Video loaded successfully");
+              setIsLoading(false);
+            }}
+            onError={(e) => {
+              console.error("VideoPlayer: Video loading error:", e);
+              console.error("VideoPlayer: Error details:", e.currentTarget.error);
+              setIsLoading(false);
+            }}
           >
             Your browser does not support the video tag.
           </video>

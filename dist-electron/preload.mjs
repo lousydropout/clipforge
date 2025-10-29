@@ -1,1 +1,34 @@
-"use strict";const n=require("electron");n.contextBridge.exposeInMainWorld("api",{invoke:(e,i)=>{if(["video.import","video.clip","video.export"].includes(e))return n.ipcRenderer.invoke(e,i);throw new Error(`Invalid IPC channel: ${e}`)},on:(e,i)=>{["ffmpeg.progress"].includes(e)&&n.ipcRenderer.on(e,(s,o)=>i(o))},off:(e,i)=>{["ffmpeg.progress"].includes(e)&&n.ipcRenderer.off(e,i)}});
+"use strict";
+const electron = require("electron");
+electron.contextBridge.exposeInMainWorld("api", {
+  invoke: (channel, args) => {
+    const validChannels = ["video.import", "video.clip", "video.export", "recording.getSources", "recording.showSourceDialog", "recording.saveFile", "recording.getMetadata", "recording.convertWebmToMp4"];
+    if (validChannels.includes(channel)) {
+      return electron.ipcRenderer.invoke(channel, args);
+    }
+    throw new Error(`Invalid IPC channel: ${channel}`);
+  },
+  on: (channel, callback) => {
+    const validChannels = ["ffmpeg.progress"];
+    if (validChannels.includes(channel)) {
+      electron.ipcRenderer.on(channel, (_, data) => callback(data));
+    }
+  },
+  off: (channel, callback) => {
+    const validChannels = ["ffmpeg.progress"];
+    if (validChannels.includes(channel)) {
+      electron.ipcRenderer.off(channel, callback);
+    }
+  },
+  // Desktop capturer for screen recording
+  desktopCapturer: {
+    getSources: (options) => {
+      try {
+        return electron.desktopCapturer.getSources(options);
+      } catch (error) {
+        console.error("desktopCapturer.getSources failed:", error);
+        throw error;
+      }
+    }
+  }
+});

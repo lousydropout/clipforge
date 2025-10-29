@@ -2,6 +2,19 @@
 
 ## Recent Changes
 
+### 2025-01-29
+
+- **Recording System Overhaul**: Replaced custom MediaRecorder implementation with `react-media-recorder` library
+- **Screen Recording Audio Fix**: Implemented separate video/audio stream capture and merging for system audio
+- **Source Selection Dialog**: Added Electron `desktopCapturer` integration for screen/window source selection
+- **UI Separation**: Split recording controls into `SourceSelector` and `RecordButton` components
+- **Preview Service**: Created centralized `previewService` for managing live stream previews
+- **WebM Optimization**: Skip MP4 conversion during recording, only convert during export
+- **Infinite Loop Fix**: Fixed camera recording infinite loop bug with proper blob processing
+- **Audio Source Configuration**: 
+  - Screen recording: System audio (speakers, applications)
+  - Camera recording: Microphone audio with processing (echo cancellation, noise suppression)
+
 ### 2025-01-27
 
 - **TailwindCSS Setup**: Added `tailwindcss@4.1.16` and `@tailwindcss/vite@4.1.16` to project
@@ -26,13 +39,19 @@
 - ✅ Epic 4 Complete: UX/Progress & Packaging (Linux with bundled FFmpeg)
 - ✅ Epic 7 Complete: UI Enhancements (doubled video player, tabbed settings)
 - ✅ Epic 8 Complete: Data Structure Upgrade (two-track architecture foundation)
+- ✅ Epic 9 Complete: Screen Recording & Camera Overlay System
 - ✅ Context isolation enabled, node integration disabled
 - ✅ Type-safe API interface available in renderer
 - ✅ Real video metadata extraction using FFprobe
 - ✅ Real FFmpeg video processing with progress updates
-- ✅ Two-track project structure ready for screen recording and camera overlay
+- ✅ Two-track project structure with working recording system
+- ✅ Screen recording with system audio capture
+- ✅ Camera recording with microphone audio processing
+- ✅ Source selection dialog for screen/window capture
+- ✅ Live preview system for recording sources
+- ✅ WebM recording with optimized export workflow
 - ✅ Development server running with hot reload
-- 🚧 Ready for Epic 9: Screen Recording & Camera Overlay
+- 🚧 Ready for Epic 10: Advanced Recording Features & Polish
 
 ## MVP Checklist
 
@@ -41,6 +60,11 @@
 - [x] Run FFmpeg trim via IPC (real FFmpeg implementation complete)
 - [x] Export to chosen folder (real FFmpeg implementation complete)
 - [x] Display export progress in UI
+- [x] Screen recording with system audio
+- [x] Camera recording with microphone audio
+- [x] Live preview of recording sources
+- [x] Source selection for screen/window capture
+- [x] Two-track recording system (main + overlay)
 
 ## Next Development Steps
 
@@ -79,6 +103,17 @@
 - [x] Add real file export functionality
 - [x] Handle FFmpeg progress parsing and streaming
 
+### Phase 6: Recording System (Epic 9) ✅ COMPLETED
+
+- [x] Implement screen recording with `react-media-recorder`
+- [x] Add camera recording with microphone audio processing
+- [x] Create source selection dialog using Electron `desktopCapturer`
+- [x] Implement live preview system for recording sources
+- [x] Fix screen recording audio with separate video/audio stream capture
+- [x] Optimize recording workflow (WebM during recording, MP4 on export)
+- [x] Fix camera recording infinite loop bug
+- [x] Separate UI components for source selection and recording controls
+
 ## Technical Decisions
 
 ### Why FFmpeg CLI over WASM?
@@ -88,9 +123,52 @@
 - Easier to debug and maintain
 - Native system integration
 
+### Why react-media-recorder over custom MediaRecorder?
+
+- Handles MediaRecorder API complexity and timing issues
+- Provides reliable blob finalization
+- Reduces custom code maintenance
+- Better error handling and state management
+
+### Why separate video/audio streams for screen recording?
+
+- `getUserMedia` with `chromeMediaSource: "desktop"` doesn't capture system audio
+- `getDisplayMedia` provides system audio but limited source selection
+- Combining streams gives both specific source selection AND system audio
+- More reliable audio capture across different platforms
+
+### Why WebM during recording, MP4 on export?
+
+- WebM is faster to record and process
+- Reduces recording latency and improves responsiveness
+- MP4 conversion only happens when user actually exports
+- Better user experience with instant recording start/stop
+
 ## Known Issues
 
 - None currently identified
+
+## Recording System Architecture
+
+### Audio Sources
+- **Screen Recording**: System audio (speakers, applications, games)
+- **Camera Recording**: Microphone audio with processing (echo cancellation, noise suppression, auto gain)
+
+### Stream Capture Strategy
+- **Screen Video**: `getUserMedia` with `chromeMediaSource: "desktop"` + specific `sourceId`
+- **Screen Audio**: `getDisplayMedia` with `audio: true` for system audio
+- **Combined**: Merged MediaStream with video tracks from desktopCapturer + audio tracks from getDisplayMedia
+
+### File Format Workflow
+- **Recording**: WebM files (faster, more responsive)
+- **Export**: MP4 conversion only when user exports final video
+- **Storage**: `/tmp/clipforge-recordings/` with `file://` URLs for renderer access
+
+### UI Components
+- **SourceSelector**: Dropdown for choosing recording source (Screen/Camera/None)
+- **RecordButton**: Start/stop recording button
+- **PreviewService**: Centralized stream management for live previews
+- **VideoPlayerWithControls**: Displays both recorded videos and live previews
 
 ## Development Environment
 
