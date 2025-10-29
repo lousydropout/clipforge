@@ -1,5 +1,41 @@
 # Recent Changes Summary
 
+## Epic 8: Data Structure Upgrade (Completed)
+
+### Two-Track Architecture Foundation
+- **Store Migration**: Migrated from `useVideoStore` to `useProjectStore` with two-track support
+- **New Interfaces**: Created `VideoTrack` and `Project` interfaces for main and overlay tracks
+- **Backward Compatibility**: Existing single-video workflow preserved during transition
+- **Component Updates**: Updated all 11 components to use new project-based state management
+
+### Key Changes
+- **VideoTrack Interface**: Added id, source type, path, metadata, trim times, and AI muting support
+- **Project Interface**: Contains mainTrack and optional overlayTrack for future features
+- **State Management**: Implemented `updateTrack()` method for track-specific updates
+- **Import Process**: Video import now creates projects with mainTrack populated
+
+### Bug Fixes
+- **Duration Mismatch**: Fixed timeline showing 2:00 while video player showed 2:58
+- **Default End Time**: Changed from 2-minute cap to full video duration
+- **Missing Import**: Fixed Playhead.tsx import error after store migration
+
+### Technical Implementation
+- **Files Created**: `src/store/useProjectStore.ts` - New two-track store
+- **Files Deleted**: `src/store/useVideoStore.ts` - Replaced with project store
+- **Components Updated**: All 11 components migrated to use project structure
+- **Type Safety**: Full TypeScript support maintained throughout migration
+
+### Build Status
+- **TypeScript Compilation**: ✅ No errors
+- **Vite Bundling**: ✅ 71 modules transformed successfully
+- **Electron Packaging**: ✅ AppImage and DEB packages built
+- **FFmpeg Bundling**: ✅ Executables properly packaged
+
+### Future Ready
+- **Screen Recording**: Ready for mainTrack source type "screen"
+- **Camera Overlay**: Ready for overlayTrack implementation
+- **AI Muting**: aiMutedPath field ready for AI-processed audio
+
 ## Epic 7: UI Enhancements (Completed)
 
 ### Video Player Improvements

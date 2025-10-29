@@ -1,11 +1,13 @@
-import { useVideoStore } from "../store/useVideoStore";
+import { useProjectStore } from "../store/useProjectStore";
 import { Input } from "./ui/input";
 import { Slider } from "./ui/slider";
 import { useState, useEffect, useCallback, useMemo } from "react";
 
 export function TrimControls() {
-  const { videoMetadata, startTime, endTime, setStartTime, setEndTime } =
-    useVideoStore();
+  const { project, updateTrack } = useProjectStore();
+  const videoMetadata = project?.mainTrack?.metadata;
+  const startTime = project?.mainTrack?.startTime || 0;
+  const endTime = project?.mainTrack?.endTime || 0;
 
   const [startTimeInput, setStartTimeInput] = useState("00:00");
   const [endTimeInput, setEndTimeInput] = useState("00:00");
@@ -19,15 +21,15 @@ export function TrimControls() {
   // Update store when video metadata changes
   useEffect(() => {
     if (videoMetadata) {
-      setEndTime(videoMetadata.duration);
+      updateTrack("main", { endTime: videoMetadata.duration });
     }
-  }, [videoMetadata, setEndTime]);
+  }, [videoMetadata, updateTrack]);
 
   const handleStartTimeChange = (value: string) => {
     setStartTimeInput(value);
     const seconds = parseTime(value);
     if (!isNaN(seconds)) {
-      setStartTime(seconds);
+      updateTrack("main", { startTime: seconds });
     }
   };
 
@@ -35,7 +37,7 @@ export function TrimControls() {
     setEndTimeInput(value);
     const seconds = parseTime(value);
     if (!isNaN(seconds)) {
-      setEndTime(seconds);
+      updateTrack("main", { endTime: seconds });
     }
   };
 
@@ -43,10 +45,9 @@ export function TrimControls() {
   const handleSliderChange = useCallback(
     (values: number[]) => {
       const [start, end] = values;
-      setStartTime(start);
-      setEndTime(end);
+      updateTrack("main", { startTime: start, endTime: end });
     },
-    [setStartTime, setEndTime]
+    [updateTrack]
   );
 
   // Memoized validation
@@ -68,26 +69,26 @@ export function TrimControls() {
       switch (event.key) {
         case "ArrowLeft":
           event.preventDefault();
-          setStartTime(Math.max(0, startTime - step));
+          updateTrack("main", { startTime: Math.max(0, startTime - step) });
           break;
         case "ArrowRight":
           event.preventDefault();
-          setStartTime(Math.min(endTime - 0.1, startTime + step));
+          updateTrack("main", { startTime: Math.min(endTime - 0.1, startTime + step) });
           break;
         case "ArrowUp":
           event.preventDefault();
-          setEndTime(Math.min(videoMetadata.duration, endTime + step));
+          updateTrack("main", { endTime: Math.min(videoMetadata.duration, endTime + step) });
           break;
         case "ArrowDown":
           event.preventDefault();
-          setEndTime(Math.max(startTime + 0.1, endTime - step));
+          updateTrack("main", { endTime: Math.max(startTime + 0.1, endTime - step) });
           break;
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [videoMetadata, startTime, endTime, setStartTime, setEndTime]);
+  }, [videoMetadata, startTime, endTime, updateTrack]);
 
   if (!videoMetadata) {
     return (

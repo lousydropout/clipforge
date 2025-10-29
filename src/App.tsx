@@ -1,4 +1,4 @@
-import { useVideoStore } from "./store/useVideoStore";
+import { useProjectStore } from "./store/useProjectStore";
 import { ipcClient } from "./services/ipcClient";
 import { VideoPlayer, VideoPlayerRef } from "./components/VideoPlayer";
 import { Timeline } from "./components/timeline/Timeline";
@@ -9,7 +9,8 @@ import { Toaster, toast } from "sonner";
 import "./App.css";
 
 function App() {
-  const { videoPath, setVideoPath, setVideoMetadata, reset } = useVideoStore();
+  const { project, setMainTrack, reset } = useProjectStore();
+  const videoPath = project?.mainTrack?.path;
   const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState("");
   const videoPlayerRef = useRef<VideoPlayerRef>(null);
@@ -22,10 +23,14 @@ function App() {
       const result = await ipcClient.importVideo();
 
       if (result.success && result.videoPath) {
-        setVideoPath(result.videoPath);
-        if (result.metadata) {
-          setVideoMetadata(result.metadata);
-        }
+        setMainTrack({
+          id: "main-1",
+          source: "imported",
+          path: result.videoPath,
+          metadata: result.metadata || null,
+          startTime: 0,
+          endTime: result.metadata?.duration || 0
+        });
         toast.success("Video imported successfully!");
       } else {
         const errorMsg = result.error || "Failed to import video";

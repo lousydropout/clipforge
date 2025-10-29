@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from "react";
-import { useVideoStore } from "../../store/useVideoStore";
+import { useProjectStore } from "../../store/useProjectStore";
 
 interface VideoTrackProps {
   duration: number;
@@ -8,7 +8,9 @@ interface VideoTrackProps {
 }
 
 export function VideoTrack({ duration, width, onSeek }: VideoTrackProps) {
-  const { startTime, endTime, setStartTime, setEndTime } = useVideoStore();
+  const { project, updateTrack } = useProjectStore();
+  const startTime = project?.mainTrack?.startTime || 0;
+  const endTime = project?.mainTrack?.endTime || 0;
   const [isDragging, setIsDragging] = useState<"start" | "end" | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -34,12 +36,12 @@ export function VideoTrack({ duration, width, onSeek }: VideoTrackProps) {
       const time = Math.max(0, Math.min(duration, (x / width) * duration));
 
       if (isDragging === "start") {
-        setStartTime(Math.min(time, endTime - 0.1));
+        updateTrack("main", { startTime: Math.min(time, endTime - 0.1) });
       } else if (isDragging === "end") {
-        setEndTime(Math.max(time, startTime + 0.1));
+        updateTrack("main", { endTime: Math.max(time, startTime + 0.1) });
       }
     },
-    [isDragging, duration, width, startTime, endTime, setStartTime, setEndTime]
+    [isDragging, duration, width, startTime, endTime, updateTrack]
   );
 
   const handleMouseUp = useCallback(() => {

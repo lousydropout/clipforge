@@ -1,18 +1,13 @@
-import { useVideoStore } from "../../store/useVideoStore";
+import { useProjectStore } from "../../store/useProjectStore";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useState, useEffect, useMemo } from "react";
 
 export function TimelineControls() {
-  const {
-    videoMetadata,
-    startTime,
-    endTime,
-    setStartTime,
-    setEndTime,
-    timelineZoom,
-    setTimelineZoom,
-  } = useVideoStore();
+  const { project, updateTrack, timelineZoom, setTimelineZoom } = useProjectStore();
+  const videoMetadata = project?.mainTrack?.metadata;
+  const startTime = project?.mainTrack?.startTime || 0;
+  const endTime = project?.mainTrack?.endTime || 0;
 
   const [startTimeInput, setStartTimeInput] = useState("00:00");
   const [endTimeInput, setEndTimeInput] = useState("00:00");
@@ -26,17 +21,16 @@ export function TimelineControls() {
   // Update store when video metadata changes
   useEffect(() => {
     if (videoMetadata) {
-      // Set default trim range to show first 2 minutes or full duration if shorter
-      const defaultEndTime = Math.min(120, videoMetadata.duration); // 2 minutes = 120 seconds
-      setEndTime(defaultEndTime);
+      // Set default trim range to full video duration
+      updateTrack("main", { endTime: videoMetadata.duration });
     }
-  }, [videoMetadata, setEndTime]);
+  }, [videoMetadata, updateTrack]);
 
   const handleStartTimeChange = (value: string) => {
     setStartTimeInput(value);
     const seconds = parseTime(value);
     if (!isNaN(seconds)) {
-      setStartTime(seconds);
+      updateTrack("main", { startTime: seconds });
     }
   };
 
@@ -44,7 +38,7 @@ export function TimelineControls() {
     setEndTimeInput(value);
     const seconds = parseTime(value);
     if (!isNaN(seconds)) {
-      setEndTime(seconds);
+      updateTrack("main", { endTime: seconds });
     }
   };
 

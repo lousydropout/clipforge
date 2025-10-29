@@ -1,4 +1,4 @@
-import { useVideoStore } from "../../store/useVideoStore";
+import { useProjectStore } from "../../store/useProjectStore";
 import { TimeRuler } from "./TimeRuler";
 import { VideoTrack } from "./VideoTrack";
 import { Playhead } from "./Playhead";
@@ -10,7 +10,8 @@ interface TimelineProps {
 }
 
 export function Timeline({ onSeek }: TimelineProps) {
-  const { videoMetadata, timelineZoom } = useVideoStore();
+  const { project, timelineZoom } = useProjectStore();
+  const videoMetadata = project?.mainTrack?.metadata;
 
   // Base pixels per second for 100% zoom (shows full video)
   // For a 1-minute video, this gives us about 1200px width at 100% zoom

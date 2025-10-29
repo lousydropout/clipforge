@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from "react";
-import { useVideoStore } from "../../store/useVideoStore";
+import { useProjectStore } from "../../store/useProjectStore";
 
 interface PlayheadProps {
   duration: number;
@@ -9,8 +9,8 @@ interface PlayheadProps {
 
 export function Playhead({ duration, width, onSeek }: PlayheadProps) {
   // Use selectors to ensure proper re-rendering when currentTime changes
-  const currentTime = useVideoStore((state) => state.currentTime);
-  const setCurrentTime = useVideoStore((state) => state.setCurrentTime);
+  const currentTime = useProjectStore((state) => state.currentTime);
+  const setCurrentTime = useProjectStore((state) => state.setCurrentTime);
   const [isDragging, setIsDragging] = useState(false);
   const playheadRef = useRef<HTMLDivElement>(null);
 

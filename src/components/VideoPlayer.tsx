@@ -1,4 +1,4 @@
-import { useVideoStore } from "../store/useVideoStore";
+import { useProjectStore } from "../store/useProjectStore";
 import { Card, CardContent } from "./ui/card";
 import {
   useEffect,
@@ -14,10 +14,11 @@ export interface VideoPlayerRef {
 }
 
 export const VideoPlayer = forwardRef<VideoPlayerRef>((_props, ref) => {
-  const videoPath = useVideoStore((state) => state.videoPath);
-  const videoMetadata = useVideoStore((state) => state.videoMetadata);
-  const setCurrentTime = useVideoStore((state) => state.setCurrentTime);
-  const playbackSpeed = useVideoStore((state) => state.playbackSpeed);
+  const project = useProjectStore((state) => state.project);
+  const videoPath = project?.mainTrack?.path;
+  const videoMetadata = project?.mainTrack?.metadata;
+  const setCurrentTime = useProjectStore((state) => state.setCurrentTime);
+  const playbackSpeed = useProjectStore((state) => state.playbackSpeed);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isLoading, setIsLoading] = useState(true);
 

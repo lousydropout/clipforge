@@ -12,6 +12,9 @@
 - **Epic 3 Complete**: IPC Handlers & FFmpeg Integration with real video processing
 - **Real Video Metadata**: Integrated FFprobe for actual video metadata extraction
 - **Real FFmpeg Integration**: Replaced all mock handlers with production FFmpeg processing
+- **Epic 8 Complete**: Data Structure Upgrade - Two-track architecture foundation
+- **Store Migration**: Migrated from single-video to project-based two-track system
+- **Duration Fix**: Fixed timeline/video player duration mismatch issue
 
 ## Current Status
 
@@ -20,12 +23,16 @@
 - ✅ Epic 1 Complete: Secure Electron shell with IPC bridge
 - ✅ Epic 2 Complete: Complete React frontend with video player, trim controls, and export dialog
 - ✅ Epic 3 Complete: Real FFmpeg integration with video processing and progress tracking
+- ✅ Epic 4 Complete: UX/Progress & Packaging (Linux with bundled FFmpeg)
+- ✅ Epic 7 Complete: UI Enhancements (doubled video player, tabbed settings)
+- ✅ Epic 8 Complete: Data Structure Upgrade (two-track architecture foundation)
 - ✅ Context isolation enabled, node integration disabled
 - ✅ Type-safe API interface available in renderer
 - ✅ Real video metadata extraction using FFprobe
 - ✅ Real FFmpeg video processing with progress updates
+- ✅ Two-track project structure ready for screen recording and camera overlay
 - ✅ Development server running with hot reload
-- 🚧 Ready for Epic 4: UX/Progress & Packaging
+- 🚧 Ready for Epic 9: Screen Recording & Camera Overlay
 
 ## MVP Checklist
 
@@ -73,20 +80,6 @@
 - [x] Handle FFmpeg progress parsing and streaming
 
 ## Technical Decisions
-
-### Why TailwindCSS v4?
-
-- Latest version with improved performance
-- Better Vite integration
-- Simplified configuration
-- Modern CSS features
-
-### Why Zustand over Redux?
-
-- Simpler API and less boilerplate
-- Better TypeScript support
-- Smaller bundle size
-- Perfect for this MVP scope
 
 ### Why FFmpeg CLI over WASM?
 

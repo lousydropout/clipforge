@@ -17,6 +17,7 @@ No project system, no AI features — just a clean, working pipeline.
 - ✅ **Epic 3 Complete**: IPC Handlers & FFmpeg Integration
 - ✅ **Epic 4 Complete**: UX/Progress & Packaging (Linux with bundled FFmpeg)
 - ✅ **Epic 7 Complete**: UI Enhancements (doubled video player, tabbed settings)
+- ✅ **Epic 8 Complete**: Data Structure Upgrade (two-track architecture)
 - ⏳ **Epic 5-6 Pending**: Additional UX/Progress features
 
 ---
@@ -218,7 +219,49 @@ No project system, no AI features — just a clean, working pipeline.
 
 ---
 
-## Epic 8: Optional Enhancements (Post-MVP)
+## Epic 8: Data Structure Upgrade ✅ COMPLETED
+
+### Story 8.1 – Two-Track Architecture Foundation ✅
+
+- [x] Create `VideoTrack` interface with id, source type, path, metadata, trim times, and AI muting support
+- [x] Create `Project` interface with mainTrack and optional overlayTrack
+- [x] Implement `useProjectStore` with two-track state management
+- [x] Add `updateTrack()` method for track-specific updates
+
+### Story 8.2 – Component Migration ✅
+
+- [x] Update all 11 components to use `useProjectStore`
+- [x] Migrate App.tsx to create projects with mainTrack on video import
+- [x] Update VideoPlayer.tsx to read from project.mainTrack
+- [x] Update ExportDialog.tsx to use mainTrack trim settings
+- [x] Update all timeline components to use project structure
+
+### Story 8.3 – Backward Compatibility ✅
+
+- [x] Maintain existing single-video workflow
+- [x] Video import creates project with mainTrack populated
+- [x] overlayTrack remains undefined (ready for future features)
+- [x] All keyboard shortcuts and UI interactions preserved
+
+### Story 8.4 – Bug Fixes ✅
+
+- [x] Fix duration mismatch between timeline and video player
+- [x] Change default end time from 2-minute cap to full video duration
+- [x] Fix missing Playhead.tsx import after store migration
+- [x] Remove unused resolution scaling code from ExportDialog
+
+### Epic 8 Completion Summary ✅
+
+- **Two-Track Foundation**: Complete project-based architecture ready for multi-track editing
+- **Store Migration**: Successfully migrated from single-video to project-based state management
+- **Component Updates**: All 11 components updated to use new project structure
+- **Backward Compatibility**: Existing workflow preserved during transition
+- **Bug Fixes**: Duration mismatch and import errors resolved
+- **Future Ready**: Architecture ready for screen recording, camera overlay, and AI muting
+
+---
+
+## Epic 9: Optional Enhancements (Post-MVP)
 
 - [ ] Add waveform / timeline visualization
 - [ ] Add drag-to-select trim range
@@ -249,7 +292,7 @@ No project system, no AI features — just a clean, working pipeline.
 
 ### ✅ Completed (Epic 2)
 
-5. `src/store/useVideoStore.ts` - Zustand state management ✅
+5. `src/store/useProjectStore.ts` - Two-track project state management ✅
 6. `src/services/ipcClient.ts` - IPC service wrappers ✅
 7. `src/components/VideoPlayer.tsx` - Video preview component ✅
 8. `src/components/TrimControls.tsx` - Time selection controls ✅

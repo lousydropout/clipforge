@@ -1,4 +1,4 @@
-import { VideoMetadata } from "../store/useVideoStore";
+import { VideoMetadata } from "../store/useProjectStore";
 
 export interface ImportVideoResponse {
   success: boolean;

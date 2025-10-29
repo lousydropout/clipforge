@@ -1,4 +1,4 @@
-import { useVideoStore } from "../store/useVideoStore";
+import { useProjectStore } from "../store/useProjectStore";
 import { ipcClient } from "../services/ipcClient";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
@@ -6,18 +6,16 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 
 export function ExportDialog() {
-  const videoPath = useVideoStore((state) => state.videoPath);
-  const videoMetadata = useVideoStore((state) => state.videoMetadata);
-  const startTime = useVideoStore((state) => state.startTime);
-  const endTime = useVideoStore((state) => state.endTime);
-  const outputResolutionPercent = useVideoStore(
-    (state) => state.outputResolutionPercent
-  );
-  const playbackSpeed = useVideoStore((state) => state.playbackSpeed);
-  const isProcessing = useVideoStore((state) => state.isProcessing);
-  const progress = useVideoStore((state) => state.progress);
-  const setProcessing = useVideoStore((state) => state.setProcessing);
-  const setProgress = useVideoStore((state) => state.setProgress);
+  const project = useProjectStore((state) => state.project);
+  const videoPath = project?.mainTrack?.path;
+  const videoMetadata = project?.mainTrack?.metadata;
+  const startTime = project?.mainTrack?.startTime || 0;
+  const endTime = project?.mainTrack?.endTime || 0;
+  const isProcessing = useProjectStore((state) => state.isProcessing);
+  const progress = useProjectStore((state) => state.progress);
+  const setProcessing = useProjectStore((state) => state.setProcessing);
+  const setProgress = useProjectStore((state) => state.setProgress);
+  const playbackSpeed = useProjectStore((state) => state.playbackSpeed);
 
   const [exportStatus, setExportStatus] = useState<
     "idle" | "success" | "error"
@@ -51,11 +49,6 @@ export function ExportDialog() {
     [videoPath, videoMetadata, startTime, endTime]
   );
 
-  const scaleToHeight = useMemo(() => {
-    if (!videoMetadata || outputResolutionPercent === 100) return undefined;
-    return Math.round(videoMetadata.height * (outputResolutionPercent / 100));
-  }, [videoMetadata, outputResolutionPercent]);
-
   const handleExport = useCallback(async () => {
     if (!videoPath || !videoMetadata) return;
 
@@ -66,18 +59,13 @@ export function ExportDialog() {
 
     try {
       // Get fresh value from store right before export
-      const currentSpeed = useVideoStore.getState().playbackSpeed;
-      // Calculate output height based on resolution control
-      const outputHeight = Math.round(
-        (videoMetadata.height * outputResolutionPercent) / 100
-      );
+      const currentSpeed = useProjectStore.getState().playbackSpeed;
 
       const result = await ipcClient.exportVideo({
         inputPath: videoPath,
         startTime,
         endTime,
-        scaleToHeight:
-          outputResolutionPercent !== 100 ? outputHeight : undefined,
+        scaleToHeight: undefined,
         playbackSpeed: currentSpeed, // Use fresh value from getState
       });
 
@@ -109,7 +97,6 @@ export function ExportDialog() {
     videoMetadata,
     startTime,
     endTime,
-    scaleToHeight,
     setProcessing,
     setProgress,
   ]);
@@ -130,14 +117,7 @@ export function ExportDialog() {
       <div className="text-sm text-gray-300">
         <p>Duration: {formatTime((endTime - startTime) / playbackSpeed)}</p>
         <p>
-          Resolution:{" "}
-          {outputResolutionPercent === 100
-            ? `${videoMetadata?.width} × ${videoMetadata?.height}`
-            : `${Math.round(
-                (videoMetadata?.width || 0) * (outputResolutionPercent / 100)
-              )} × ${Math.round(
-                (videoMetadata?.height || 0) * (outputResolutionPercent / 100)
-              )} (${outputResolutionPercent}%)`}
+          Resolution: {videoMetadata?.width} × {videoMetadata?.height}
         </p>
       </div>
 
