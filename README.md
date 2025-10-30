@@ -30,6 +30,14 @@ Mutes important words, turning your audio into nonsensical gibberish! 🤡
 
 OpenAI Whisper ignores filler words during transcription, so GPT-4o-mini receives clean text and incorrectly identifies key words as "fillers". Classic case of "garbage in, garbage out"!
 
+### API Key Requirement
+
+The AI feature (broken as it is) requires your `OPENAI_API_KEY` to be set in your environment variables. The app will use this key to call OpenAI's Whisper and GPT-4o-mini APIs. Make sure to set it before running the application:
+
+```bash
+export OPENAI_API_KEY="your-api-key-here"
+```
+
 ## ⚠️ WARNING: DO NOT USE THE AI FEATURE
 
 The AI filler word removal feature is **DANGEROUS** and will make your videos worse. It mutes important words instead of filler words, creating nonsensical audio. Stick to the core video editing features only!
