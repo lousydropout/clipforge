@@ -294,7 +294,7 @@ export function ScreenOverlayEditor({ onBackToWelcome }: ScreenOverlayEditorProp
                 <div className="flex justify-center">
                   <RecordButton
                     isRecording={isAnyRecording}
-                    selectedSource="screen" // Use screen as primary for dual recording
+                    hasSelectedSource={true} // Always true for dual recording
                     onStartRecording={handleStartRecording}
                     onStopRecording={handleStopRecording}
                     disabled={isLoading}

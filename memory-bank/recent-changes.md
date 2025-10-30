@@ -1,5 +1,45 @@
 # Recent Changes Summary
 
+## Epic 11: Screen-Only Recording Flow (Completed)
+
+### Dual Recording Architecture
+- **Separate Streams**: Implemented independent recording of screen video and microphone audio
+- **FFmpeg Merging**: Added post-recording audio/video merging with proper codec handling
+- **Microphone Integration**: Created `MicrophoneSelector` component with device enumeration
+- **Screen Source Selection**: Built `ScreenSourceSelector` with `desktopCapturer` integration
+- **Export Location**: Added `ExportLocationSelector` for user-chosen save locations
+
+### Key Components Created
+- **MicrophoneSelector**: Device selection with permission handling and audio processing options
+- **ScreenSourceSelector**: Dropdown for screen/window source selection with thumbnails
+- **ExportLocationSelector**: Native file dialog integration for save location selection
+- **Enhanced ScreenRecorder**: Dual recording system with separate MediaRecorder instances
+
+### Technical Implementation
+- **IPC Handlers**: Added `recording.mergeAudioVideo`, `dialog.showSaveDialog`, `file.copyFile`
+- **FFmpeg Integration**: Implemented audio/video merging with libopus codec for WebM
+- **File Path Handling**: Fixed `file://` protocol prefix issues in file operations
+- **Permission Management**: Graceful microphone permission request with device enumeration
+
+### UI/UX Improvements
+- **Streamlined Workflow**: Removed post-recording editor redirect, direct save to user location
+- **Source Selection**: Replaced redundant dialogs with intuitive dropdown selection
+- **Preview System**: Enhanced preview functionality with direct source selection
+- **Export Requirements**: Added export location requirement before recording starts
+
+### Bug Fixes and Challenges
+- **System Audio Abandonment**: Pivoted from unreliable system audio to consistent microphone audio
+- **FFmpeg Codec Issues**: Resolved multiple codec compatibility problems (AAC vs Opus, experimental encoders)
+- **Stream Mapping**: Fixed FFmpeg stream mapping errors with explicit video/audio mapping
+- **File Operations**: Resolved renderer process file operation limitations with main process IPC
+
+### Build Status
+- **TypeScript Compilation**: ✅ No errors
+- **Component Integration**: ✅ All new components working seamlessly
+- **IPC Communication**: ✅ All new handlers properly registered and whitelisted
+- **File Operations**: ✅ Proper file copying to user-chosen locations
+- **Audio Merging**: ✅ Reliable FFmpeg-based audio/video merging
+
 ## Epic 8: Data Structure Upgrade (Completed)
 
 ### Two-Track Architecture Foundation

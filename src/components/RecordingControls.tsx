@@ -246,10 +246,10 @@ export function RecordingControls({ onPreviewStreamChange }: RecordingControlsPr
       {/* Record Button */}
       <RecordButton
         isRecording={isAnyRecording}
-        selectedSource={selectedSource}
+        hasSelectedSource={selectedSource !== "none"}
         onStartRecording={handleStartRecording}
         onStopRecording={handleStopRecording}
-              disabled={isLoading}
+        disabled={isLoading}
       />
     </div>
   );

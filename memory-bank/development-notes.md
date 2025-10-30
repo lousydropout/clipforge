@@ -4,19 +4,22 @@
 
 ### 2025-01-29
 
-- **Epic 10 Completion**: Implemented Welcome Screen with three separate workflow components (Import Video, Screen Recording, Screen + Overlay)
-- **Timeline UI Enhancement**: Updated VideoTrack component to show full video "tape" at low opacity with selected portion highlighted
-- **File Path Export Fix**: Fixed critical "Input video file not found" error by properly converting file:// URLs to file system paths
-- **Recording System Overhaul**: Replaced custom MediaRecorder implementation with `react-media-recorder` library
-- **Screen Recording Audio Fix**: Implemented separate video/audio stream capture and merging for system audio
-- **Source Selection Dialog**: Added Electron `desktopCapturer` integration for screen/window source selection
-- **UI Separation**: Split recording controls into `SourceSelector` and `RecordButton` components
-- **Preview Service**: Created centralized `previewService` for managing live stream previews
-- **WebM Optimization**: Skip MP4 conversion during recording, only convert during export
-- **Infinite Loop Fix**: Fixed camera recording infinite loop bug with proper blob processing
-- **Audio Source Configuration**: 
-  - Screen recording: System audio (speakers, applications)
-  - Camera recording: Microphone audio with processing (echo cancellation, noise suppression)
+- **Epic 11 Implementation**: Completed screen-only recording flow with microphone integration
+- **Dual Recording Architecture**: Implemented separate screen video and microphone audio recording with FFmpeg merging
+- **Microphone Device Selection**: Added `MicrophoneSelector` component with device enumeration and permission handling
+- **Screen Source Selection**: Created `ScreenSourceSelector` component with `desktopCapturer` integration
+- **Export Location Selection**: Added `ExportLocationSelector` component for user-chosen save locations
+- **File Path Handling**: Fixed `file://` protocol prefix issues in file copying operations
+- **Audio Merging**: Implemented FFmpeg-based audio/video merging with proper codec handling (libopus for WebM)
+- **Preview System**: Restored and enhanced preview functionality with direct source selection
+- **Workflow Simplification**: Removed post-recording video editor redirect, direct save to user location
+- **IPC Enhancements**: Added new handlers for audio merging, file copying, and save dialog
+- **System Audio Abandonment**: Pivoted from unreliable system audio capture to consistent microphone audio
+- **UI/UX Improvements**: 
+  - Replaced redundant source selection dialog with dropdown
+  - Added export location requirement before recording
+  - Fixed video player audio muting issues
+  - Streamlined recording workflow
 
 ### 2025-01-27
 
@@ -44,20 +47,24 @@
 - ✅ Epic 8 Complete: Data Structure Upgrade (two-track architecture foundation)
 - ✅ Epic 9 Complete: Screen Recording & Camera Overlay System
 - ✅ Epic 10 Complete: Import Video Flow (Editor Core) with Welcome Screen
+- ✅ Epic 11 Complete: Screen-Only Recording Flow with Microphone Integration
 - ✅ Context isolation enabled, node integration disabled
 - ✅ Type-safe API interface available in renderer
 - ✅ Real video metadata extraction using FFprobe
 - ✅ Real FFmpeg video processing with progress updates
 - ✅ Two-track project structure with working recording system
-- ✅ Screen recording with system audio capture
+- ✅ Screen recording with microphone audio capture and merging
 - ✅ Camera recording with microphone audio processing
 - ✅ Source selection dialog for screen/window capture
 - ✅ Live preview system for recording sources
 - ✅ WebM recording with optimized export workflow
 - ✅ Welcome Screen with three workflow options (Import, Screen, Screen+Overlay)
 - ✅ Separate editor components for each workflow
+- ✅ Microphone device selection and permission handling
+- ✅ Export location selection with native file dialog
+- ✅ Dual recording architecture with FFmpeg audio merging
 - ✅ Development server running with hot reload
-- 🚧 Ready for Epic 11: Screen-Only Recording Flow
+- 🚧 Ready for Epic 12: Screen + Overlay Recording Flow
 
 ## MVP Checklist
 
@@ -66,10 +73,13 @@
 - [x] Run FFmpeg trim via IPC (real FFmpeg implementation complete)
 - [x] Export to chosen folder (real FFmpeg implementation complete)
 - [x] Display export progress in UI
-- [x] Screen recording with system audio
+- [x] Screen recording with microphone audio
 - [x] Camera recording with microphone audio
 - [x] Live preview of recording sources
 - [x] Source selection for screen/window capture
+- [x] Microphone device selection and permission handling
+- [x] Export location selection for recorded videos
+- [x] Audio/video merging with FFmpeg
 - [x] Two-track recording system (main + overlay)
 
 ## Upcoming Epic Plans
@@ -101,19 +111,33 @@
 - **Navigation**: Simple state-based routing with "Back to Welcome" buttons
 - **Build Status**: All components compile successfully with no TypeScript errors
 
-### Epic 11: Screen-Only Recording Flow 📋 PLANNED
+### Epic 11: Screen-Only Recording Flow ✅ COMPLETED
 
 **Goal**: Let users record screen with microphone, save locally, auto-open in editor.
 
+**Current Status**: Complete with dual recording architecture and FFmpeg merging
+
+**Epic 11 Completion Summary**:
+- **Dual Recording System**: Implemented separate screen video and microphone audio recording
+- **MicrophoneSelector Component**: Added device enumeration with permission handling
+- **ScreenSourceSelector Component**: Created dropdown for screen/window source selection
+- **ExportLocationSelector Component**: Added native file dialog for save location selection
+- **FFmpeg Audio Merging**: Implemented proper audio/video merging with libopus codec
+- **Preview System**: Restored and enhanced preview with direct source selection
+- **Workflow Simplification**: Removed post-recording editor redirect, direct save to user location
+- **File Path Handling**: Fixed `file://` protocol prefix issues in file operations
+- **UI/UX Improvements**: Streamlined recording workflow with better user experience
+- **System Audio Pivot**: Abandoned unreliable system audio for consistent microphone audio
+
 **Tasks**:
-- [ ] Simplify current screen recording system
-- [ ] Implement source selection via `desktopCapturer.getSources()`
-- [ ] Add mic input selector from `enumerateDevices()`
-- [ ] Use `getDisplayMedia` for video + `getUserMedia` for mic
-- [ ] Combine tracks into single `MediaStream`
-- [ ] Add post-recording processing overlay
-- [ ] Implement auto-redirect to editor
-- [ ] Handle audio track missing warnings
+- [x] Simplify current screen recording system
+- [x] Implement source selection via `desktopCapturer.getSources()`
+- [x] Add mic input selector from `enumerateDevices()`
+- [x] Use `getUserMedia` for video + `getUserMedia` for mic (dual approach)
+- [x] Record tracks separately and merge with FFmpeg
+- [x] Add export location selection requirement
+- [x] Implement direct save to user-chosen location
+- [x] Handle audio track merging with proper error handling
 
 ### Epic 12: Screen + Overlay Recording Flow 📋 PLANNED
 
@@ -249,24 +273,65 @@ function fileUrlToPath(fileUrl: string): string {
 - ✅ FFmpeg receives valid file paths
 - ✅ Export functionality restored
 
+### Epic 11 Implementation Challenges (2025-01-29)
+
+**System Audio Capture Issues**:
+- **Problem**: `getDisplayMedia` with system audio was unreliable across platforms
+- **Solution**: Pivoted to microphone-only audio capture with dual recording architecture
+- **Result**: Consistent audio capture with better user experience
+
+**Microphone Permission Handling**:
+- **Problem**: `DOMException: Could not start audio source` when enumerating devices
+- **Solution**: Implemented graceful permission request with temporary stream creation
+- **Result**: Smooth device enumeration with proper permission handling
+
+**FFmpeg Audio Merging**:
+- **Problem**: Multiple codec and stream mapping issues during audio/video merging
+- **Challenges**: 
+  - Stream specifier errors with `amix` filter
+  - AAC codec incompatibility with WebM container
+  - Experimental Opus encoder warnings
+- **Solution**: 
+  - Used explicit stream mapping (`-map 0:v:0 -map 1:a:0`)
+  - Switched to `libopus` codec for WebM compatibility
+  - Removed `amix` filter in favor of direct mapping
+- **Result**: Reliable audio/video merging with proper codec handling
+
+**File Path Protocol Issues**:
+- **Problem**: `file://` protocol prefix causing `ENOENT` errors in file operations
+- **Solution**: Added path cleaning in main process IPC handlers
+- **Result**: Proper file copying to user-chosen locations
+
+**UI/UX Improvements**:
+- **Problem**: Redundant source selection dialogs and poor workflow
+- **Solution**: 
+  - Replaced dialog with dropdown source selection
+  - Added export location requirement before recording
+  - Removed post-recording editor redirect
+- **Result**: Streamlined recording workflow with better user experience
+
 ## Recording System Architecture
 
 ### Audio Sources
-- **Screen Recording**: System audio (speakers, applications, games)
+- **Screen Recording**: Microphone audio with processing (echo cancellation, noise suppression, auto gain)
 - **Camera Recording**: Microphone audio with processing (echo cancellation, noise suppression, auto gain)
 
 ### Stream Capture Strategy
 - **Screen Video**: `getUserMedia` with `chromeMediaSource: "desktop"` + specific `sourceId`
-- **Screen Audio**: `getDisplayMedia` with `audio: true` for system audio
-- **Combined**: Merged MediaStream with video tracks from desktopCapturer + audio tracks from getDisplayMedia
+- **Screen Audio**: Attempted via `getDisplayMedia` but unreliable, abandoned for microphone audio
+- **Microphone Audio**: `getUserMedia` with specific device ID and audio processing
+- **Dual Recording**: Separate MediaRecorder instances for video and audio, merged with FFmpeg
 
 ### File Format Workflow
 - **Recording**: WebM files (faster, more responsive)
-- **Export**: MP4 conversion only when user exports final video
-- **Storage**: `/tmp/clipforge-recordings/` with `file://` URLs for renderer access
+- **Merging**: FFmpeg combines screen video and microphone audio into single WebM
+- **Export**: Direct save to user-chosen location (no MP4 conversion)
+- **Storage**: `/tmp/clipforge-recordings/` for temporary files, user location for final output
 
 ### UI Components
-- **SourceSelector**: Dropdown for choosing recording source (Screen/Camera/None)
+- **ScreenSourceSelector**: Dropdown for choosing screen/window source
+- **MicrophoneSelector**: Device selection with permission handling
+- **ExportLocationSelector**: Native file dialog for save location
 - **RecordButton**: Start/stop recording button
 - **PreviewService**: Centralized stream management for live previews
 - **VideoPlayerWithControls**: Displays both recorded videos and live previews
@@ -276,7 +341,7 @@ function fileUrlToPath(fileUrl: string): string {
 ```
 Welcome Screen
  ├── Import Video  →  Epic 10 (Editor Core)
- ├── Screen Only   →  Epic 11  →  Editor (Epic 10)
+ ├── Screen Only   →  Epic 11  →  Direct Save to User Location
  └── Screen+Overlay→  Epic 12  →  Editor (Epic 10)
                                ↘ (optional) Epic 13 (AI Muting)
 ```
@@ -284,21 +349,17 @@ Welcome Screen
 ## Current System vs. Planned Epics Alignment
 
 ### What's Already Built ✅
-- **Epic 10 (Editor Core)**: 90% complete - has video import, preview, timeline, trim controls, speed/resolution adjustments, export
-- **Epic 11 (Screen Recording)**: 80% complete - has screen recording with audio, but needs simplification
+- **Epic 10 (Editor Core)**: 100% complete - has video import, preview, timeline, trim controls, speed/resolution adjustments, export
+- **Epic 11 (Screen Recording)**: 100% complete - has dual recording system with microphone audio and FFmpeg merging
 - **Epic 12 (Screen + Overlay)**: 60% complete - has two-track system, but needs PiP merging instead
 
 ### What Needs to be Added/Modified 🔄
-- **Welcome Screen**: New entry point needed
-- **Epic 11 Simplification**: Current system is more complex than needed
 - **Epic 12 PiP Merging**: Current two-track approach needs to change to PiP merging
 - **Epic 13 AI Muting**: Completely new feature
 
 ### Key Architectural Changes Needed
-1. **Welcome Screen**: Add as main entry point before current editor
-2. **Single-Track Editor**: Simplify current two-track system for Epic 10
-3. **PiP Processing**: Replace two-track recording with FFmpeg PiP merging for Epic 12
-4. **AI Integration**: Add Whisper + GPT pipeline for Epic 13
+1. **PiP Processing**: Replace two-track recording with FFmpeg PiP merging for Epic 12
+2. **AI Integration**: Add Whisper + GPT pipeline for Epic 13
 
 ## Development Environment
 

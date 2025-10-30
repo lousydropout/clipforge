@@ -3,15 +3,15 @@ import { useProjectStore } from "../store/useProjectStore";
 import { Circle } from "lucide-react";
 import { toast } from "sonner";
 import { ScreenRecorder, ScreenRecorderRef } from "./ScreenRecorder";
-import { SourceSelector, RecordingSource } from "./SourceSelector";
+import { ScreenSourceSelector } from "./ScreenSourceSelector";
+import { MicrophoneSelector } from "./MicrophoneSelector";
+import { ExportLocationSelector } from "./ExportLocationSelector";
 import { RecordButton } from "./RecordButton";
 import { previewService } from "../services/previewService";
 import { VideoPlayerWithControls, VideoPlayerWithControlsRef } from "./VideoPlayerWithControls";
-import { Timeline } from "./timeline/Timeline";
-import { SettingsPanel } from "./SettingsPanel";
 import { Button } from "./ui/button";
-import { Separator } from "./ui/separator";
 import { Toaster } from "sonner";
+import { ipcClient } from "../services/ipcClient";
 
 interface ScreenRecordingEditorProps {
   onBackToWelcome: () => void;
@@ -23,22 +23,20 @@ export function ScreenRecordingEditor({ onBackToWelcome }: ScreenRecordingEditor
     recordingStartTime,
     setRecordingScreen,
     setRecordingStartTime,
-    updateTrack,
-    setMainTrack,
-    project,
     setWorkflow
   } = useProjectStore();
 
   const [isLoading, setIsLoading] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
-  const [selectedSource, setSelectedSource] = useState<RecordingSource>("screen");
+  const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
   const [previewStream, setPreviewStream] = useState<MediaStream | null>(null);
   const [hasRecorded, setHasRecorded] = useState(false);
+  const [micEnabled, setMicEnabled] = useState(false);
+  const [micDeviceId, setMicDeviceId] = useState<string | null>(null);
+  const [exportPath, setExportPath] = useState<string | null>(null);
   
   const screenRecorderRef = useRef<ScreenRecorderRef>(null);
   const videoPlayerRef = useRef<VideoPlayerWithControlsRef>(null);
-
-  const videoPath = project?.mainTrack?.path;
 
   // Update recording duration every second
   useEffect(() => {
@@ -58,15 +56,23 @@ export function ScreenRecordingEditor({ onBackToWelcome }: ScreenRecordingEditor
   }, [recordingStartTime]);
 
   // Handle source change and preview
-  const handleSourceChange = async (source: RecordingSource) => {
-    setSelectedSource(source);
+  const handleSourceChange = async (sourceId: string | null) => {
+    console.log("ScreenRecordingEditor: handleSourceChange called with:", sourceId);
+    setSelectedSourceId(sourceId);
     
-    try {
-      const stream = await previewService.getPreviewStream(source);
-      setPreviewStream(stream);
-    } catch (error) {
-      console.warn("Failed to get preview stream:", error);
+    if (sourceId) {
+      // Use ScreenRecorder's preview methods for screen source
+      // Pass the sourceId directly to avoid state timing issues
+      try {
+        await screenRecorderRef.current?.startPreviewWithSource(sourceId);
+      } catch (error) {
+        console.warn("Failed to start screen preview:", error);
+        setPreviewStream(null);
+      }
+    } else {
+      // No source selected, clear preview
       setPreviewStream(null);
+      screenRecorderRef.current?.stopPreview();
     }
   };
 
@@ -74,6 +80,7 @@ export function ScreenRecordingEditor({ onBackToWelcome }: ScreenRecordingEditor
   useEffect(() => {
     return () => {
       previewService.stopCurrentStream();
+      screenRecorderRef.current?.stopPreview();
     };
   }, []);
 
@@ -85,13 +92,26 @@ export function ScreenRecordingEditor({ onBackToWelcome }: ScreenRecordingEditor
 
   const handleStartRecording = async () => {
     try {
-      if (selectedSource === "screen") {
-        console.log("Starting screen recording...");
-        setRecordingScreen(true);
-        setRecordingStartTime(Date.now());
-        screenRecorderRef.current?.startRecording();
-        toast.success("Screen recording started");
+      if (!selectedSourceId) {
+        toast.error("Please select a screen source first");
+        return;
       }
+      
+      if (!exportPath) {
+        toast.error("Please choose where to save your recording");
+        return;
+      }
+      
+      console.log("Starting screen recording...");
+      setRecordingScreen(true);
+      setRecordingStartTime(Date.now());
+      
+      // Pass microphone device ID if enabled
+      const micDevice = micEnabled && micDeviceId ? micDeviceId : undefined;
+      await screenRecorderRef.current?.startRecording(micDevice);
+      
+      const message = micEnabled ? "Screen recording with microphone started" : "Screen recording started";
+      toast.success(message);
     } catch (error) {
       console.error("Failed to start recording:", error);
       toast.error(error instanceof Error ? error.message : "Failed to start recording");
@@ -109,34 +129,29 @@ export function ScreenRecordingEditor({ onBackToWelcome }: ScreenRecordingEditor
     }
   };
 
-  const handleScreenRecordingComplete = (path: string, metadata: any) => {
+  const handleScreenRecordingComplete = async (path: string, metadata: any) => {
     console.log("Screen recording completed:", path, metadata);
     
-    // Update mainTrack with recorded video
-    if (project) {
-      console.log("ScreenRecordingEditor: Updating existing project mainTrack");
-      updateTrack("main", {
-        path,
-        metadata,
-        startTime: 0,
-        endTime: metadata.duration,
-      });
-    } else {
-      console.log("ScreenRecordingEditor: Creating new project with mainTrack");
-      setMainTrack({
-        id: "main-1",
-        source: "screen",
-        path,
-        metadata,
-        startTime: 0,
-        endTime: metadata.duration,
-      });
+    try {
+      // Copy the final video to the user's chosen location
+      await ipcClient.copyFile(path, exportPath!);
+      
+      console.log("Video saved to:", exportPath);
+      toast.success(`Recording saved to: ${exportPath}`);
+      
+      // Reset the form for next recording
+      setRecordingScreen(false);
+      setRecordingStartTime(null);
+      setHasRecorded(false);
+      setExportPath(null);
+      setSelectedSourceId(null);
+      setMicEnabled(false);
+      setMicDeviceId(null);
+      
+    } catch (error) {
+      console.error("Failed to save recording to chosen location:", error);
+      toast.error("Failed to save recording to chosen location");
     }
-    
-    setRecordingScreen(false);
-    setRecordingStartTime(null);
-    setHasRecorded(true);
-    toast.success("Screen recording saved! You can now edit it below.");
   };
 
   const handleRecordingError = (error: string) => {
@@ -149,9 +164,6 @@ export function ScreenRecordingEditor({ onBackToWelcome }: ScreenRecordingEditor
     setRecordingStartTime(null);
   };
 
-  const handleTimelineSeek = (time: number) => {
-    videoPlayerRef.current?.seekTo(time);
-  };
 
   const handleBackToWelcome = () => {
     onBackToWelcome();
@@ -202,12 +214,33 @@ export function ScreenRecordingEditor({ onBackToWelcome }: ScreenRecordingEditor
               <h2 className="text-xl font-semibold mb-4">Recording Setup</h2>
               
               <div className="space-y-4">
-                {/* Source Selection */}
+                {/* Screen Source Selection */}
                 <div className="flex items-center gap-4">
-                  <label className="text-sm font-medium text-gray-300">Source:</label>
-                  <SourceSelector
-                    selectedSource={selectedSource}
+                  <label className="text-sm font-medium text-gray-300">Screen Source:</label>
+                  <ScreenSourceSelector
+                    selectedSourceId={selectedSourceId}
                     onSourceChange={handleSourceChange}
+                    disabled={isRecordingScreen}
+                  />
+                </div>
+
+                {/* Microphone Selection */}
+                <div className="flex items-center gap-4">
+                  <label className="text-sm font-medium text-gray-300">Microphone:</label>
+                  <MicrophoneSelector
+                    enabled={micEnabled}
+                    selectedDeviceId={micDeviceId}
+                    onEnabledChange={setMicEnabled}
+                    onDeviceChange={setMicDeviceId}
+                    disabled={isRecordingScreen}
+                  />
+                </div>
+
+                {/* Export Location Selection */}
+                <div className="flex items-center gap-4">
+                  <label className="text-sm font-medium text-gray-300">Save to:</label>
+                  <ExportLocationSelector
+                    onLocationChange={setExportPath}
                     disabled={isRecordingScreen}
                   />
                 </div>
@@ -218,6 +251,7 @@ export function ScreenRecordingEditor({ onBackToWelcome }: ScreenRecordingEditor
                     <Circle className="h-3 w-3 fill-red-400 animate-pulse" />
                     <span className="text-sm font-medium">
                       Recording: {formatDuration(recordingDuration)}
+                      {micEnabled && " (with microphone)"}
                     </span>
                   </div>
                 )}
@@ -226,7 +260,7 @@ export function ScreenRecordingEditor({ onBackToWelcome }: ScreenRecordingEditor
                 <div className="flex justify-center">
                   <RecordButton
                     isRecording={isRecordingScreen}
-                    selectedSource={selectedSource}
+                    hasSelectedSource={!!selectedSourceId && !!exportPath}
                     onStartRecording={handleStartRecording}
                     onStopRecording={handleStopRecording}
                     disabled={isLoading}
@@ -236,28 +270,12 @@ export function ScreenRecordingEditor({ onBackToWelcome }: ScreenRecordingEditor
             </div>
           )}
 
-          {/* Video Player with Controls */}
-          <VideoPlayerWithControls 
-            ref={videoPlayerRef} 
-            previewStream={hasRecorded ? null : previewStream}
-          />
-
-          {/* Timeline and Settings - Only show when video is recorded */}
-          {hasRecorded && videoPath && (
-            <>
-              <Separator className="bg-gray-700" />
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                {/* Timeline - Takes up most of the space */}
-                <div className="lg:col-span-3">
-                  <Timeline onSeek={handleTimelineSeek} />
-                </div>
-
-                {/* Settings Panel - Right sidebar */}
-                <div className="lg:col-span-1">
-                  <SettingsPanel />
-                </div>
-              </div>
-            </>
+          {/* Video Player with Controls - Only show preview when not recorded */}
+          {!hasRecorded && (
+            <VideoPlayerWithControls 
+              ref={videoPlayerRef} 
+              previewStream={previewStream}
+            />
           )}
         </div>
       </main>
@@ -267,6 +285,12 @@ export function ScreenRecordingEditor({ onBackToWelcome }: ScreenRecordingEditor
         ref={screenRecorderRef}
         onRecordingComplete={handleScreenRecordingComplete}
         onError={handleRecordingError}
+        onStreamChange={setPreviewStream}
+        onPreviewError={(error) => {
+          console.warn("Screen preview error:", error);
+          setPreviewStream(null);
+        }}
+        selectedSourceId={selectedSourceId}
       />
 
       {/* Toast notifications */}

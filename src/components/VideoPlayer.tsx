@@ -172,10 +172,19 @@ export const VideoPlayer = forwardRef<VideoPlayerRef>((_props, ref) => {
             onLoadedData={() => {
               console.log("VideoPlayer: Video loaded successfully");
               setIsLoading(false);
+              // Explicitly enable audio and set volume to maximum
+              if (videoRef.current) {
+                videoRef.current.muted = false;
+                videoRef.current.volume = 1.0;
+                console.log("VideoPlayer: Audio enabled, volume set to 1.0");
+              }
             }}
             onError={(e) => {
               console.error("VideoPlayer: Video loading error:", e);
-              console.error("VideoPlayer: Error details:", e.currentTarget.error);
+              console.error(
+                "VideoPlayer: Error details:",
+                e.currentTarget.error
+              );
               setIsLoading(false);
             }}
           >

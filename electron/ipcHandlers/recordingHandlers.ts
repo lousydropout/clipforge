@@ -251,6 +251,66 @@ export async function handleGetSources(): Promise<{ id: string; name: string; th
 }
 
 /**
+ * Merge audio and video files using FFmpeg
+ */
+export async function handleMergeAudioVideo(params: {
+  videoPath: string;
+  audioPath: string;
+  outputFilename: string;
+}): Promise<string> {
+  try {
+    const { videoPath, audioPath, outputFilename } = params;
+    
+    // Create output directory if it doesn't exist
+    const outputDir = join(tmpdir(), "clipforge-recordings");
+    await mkdir(outputDir, { recursive: true });
+    const outputPath = join(outputDir, outputFilename);
+
+    console.log("Merging audio and video:", { videoPath, audioPath, outputPath });
+
+    // Use FFmpeg to merge audio and video
+    // Since the video input may not have audio, we'll add the audio track to the video
+    const ffmpeg = spawn("ffmpeg", [
+      "-i", videoPath,  // Input video (may or may not have audio)
+      "-i", audioPath,  // Input audio
+      "-c:v", "copy",   // Copy video without re-encoding
+      "-c:a", "libopus", // Encode audio as libopus for WebM compatibility
+      "-map", "0:v:0",  // Map video from first input
+      "-map", "1:a:0",  // Map audio from second input
+      "-shortest",      // End when shortest stream ends
+      outputPath
+    ]);
+
+    return new Promise((resolve, reject) => {
+      let errorOutput = "";
+
+      ffmpeg.stderr.on("data", (data) => {
+        errorOutput += data.toString();
+      });
+
+      ffmpeg.on("close", (code) => {
+        if (code === 0) {
+          console.log("Audio and video merged successfully:", outputPath);
+          resolve(outputPath);
+        } else {
+          console.error("FFmpeg merge failed with code:", code);
+          console.error("Error output:", errorOutput);
+          reject(new Error(`FFmpeg merge failed: ${errorOutput}`));
+        }
+      });
+
+      ffmpeg.on("error", (error) => {
+        console.error("FFmpeg process error:", error);
+        reject(new Error("FFmpeg process failed"));
+      });
+    });
+  } catch (error) {
+    console.error("Failed to merge audio and video:", error);
+    throw new Error("Failed to merge audio and video");
+  }
+}
+
+/**
  * Show source selection dialog
  */
 export async function showSourceSelectionDialog(): Promise<string | null> {

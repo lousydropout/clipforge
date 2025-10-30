@@ -4,7 +4,7 @@ import path from "node:path";
 import { spawn } from "child_process";
 import { handleClipVideo } from "./ipcHandlers/clipVideo";
 import { handleExportVideo } from "./ipcHandlers/exportVideo";
-import { handleSaveFile, getRecordingMetadata, handleConvertWebmToMp4, handleGetSources, showSourceSelectionDialog } from "./ipcHandlers/recordingHandlers";
+import { handleSaveFile, getRecordingMetadata, handleConvertWebmToMp4, handleGetSources, showSourceSelectionDialog, handleMergeAudioVideo } from "./ipcHandlers/recordingHandlers";
 
 
 // --- existing code below this line stays unchanged ---
@@ -132,6 +132,19 @@ ipcMain.handle("recording.getMetadata", async (_, path) => getRecordingMetadata(
 ipcMain.handle("recording.convertWebmToMp4", async (_, params) => handleConvertWebmToMp4(params));
 ipcMain.handle("recording.getSources", async () => handleGetSources());
 ipcMain.handle("recording.showSourceDialog", async () => showSourceSelectionDialog());
+ipcMain.handle("recording.mergeAudioVideo", async (_, params) => handleMergeAudioVideo(params));
+ipcMain.handle("dialog.showSaveDialog", async (_, options) => {
+  const result = await dialog.showSaveDialog(options);
+  return result;
+});
+
+ipcMain.handle("file.copyFile", async (_, { sourcePath, destinationPath }) => {
+  const fs = await import('fs/promises');
+  // Remove file:// prefix if present
+  const cleanSourcePath = sourcePath.startsWith('file://') ? sourcePath.slice(7) : sourcePath;
+  await fs.copyFile(cleanSourcePath, destinationPath);
+  return { success: true };
+});
 
 async function getVideoMetadata(videoPath: string): Promise<any> {
   return new Promise((resolve, reject) => {

@@ -1,10 +1,9 @@
 import { Button } from "./ui/button";
 import { Circle, Square } from "lucide-react";
-import { RecordingSource } from "./SourceSelector";
 
 interface RecordButtonProps {
   isRecording: boolean;
-  selectedSource: RecordingSource;
+  hasSelectedSource: boolean;
   onStartRecording: () => void;
   onStopRecording: () => void;
   disabled?: boolean;
@@ -12,7 +11,7 @@ interface RecordButtonProps {
 
 export function RecordButton({ 
   isRecording, 
-  selectedSource, 
+  hasSelectedSource, 
   onStartRecording, 
   onStopRecording, 
   disabled 
@@ -31,7 +30,7 @@ export function RecordButton({
     );
   }
 
-  if (selectedSource === "none") {
+  if (!hasSelectedSource) {
     return (
       <Button
         disabled
@@ -39,7 +38,7 @@ export function RecordButton({
         className="flex items-center gap-2"
       >
         <Circle className="h-4 w-4" />
-        Select Source
+        Select Screen Source
       </Button>
     );
   }

@@ -532,6 +532,61 @@ async function handleGetSources() {
     throw new Error("Failed to get screen sources");
   }
 }
+async function handleMergeAudioVideo(params) {
+  try {
+    const { videoPath, audioPath, outputFilename } = params;
+    const outputDir = join(tmpdir(), "clipforge-recordings");
+    await mkdir(outputDir, { recursive: true });
+    const outputPath = join(outputDir, outputFilename);
+    console.log("Merging audio and video:", { videoPath, audioPath, outputPath });
+    const ffmpeg = spawn("ffmpeg", [
+      "-i",
+      videoPath,
+      // Input video (may or may not have audio)
+      "-i",
+      audioPath,
+      // Input audio
+      "-c:v",
+      "copy",
+      // Copy video without re-encoding
+      "-c:a",
+      "libopus",
+      // Encode audio as libopus for WebM compatibility
+      "-map",
+      "0:v:0",
+      // Map video from first input
+      "-map",
+      "1:a:0",
+      // Map audio from second input
+      "-shortest",
+      // End when shortest stream ends
+      outputPath
+    ]);
+    return new Promise((resolve, reject) => {
+      let errorOutput = "";
+      ffmpeg.stderr.on("data", (data) => {
+        errorOutput += data.toString();
+      });
+      ffmpeg.on("close", (code) => {
+        if (code === 0) {
+          console.log("Audio and video merged successfully:", outputPath);
+          resolve(outputPath);
+        } else {
+          console.error("FFmpeg merge failed with code:", code);
+          console.error("Error output:", errorOutput);
+          reject(new Error(`FFmpeg merge failed: ${errorOutput}`));
+        }
+      });
+      ffmpeg.on("error", (error) => {
+        console.error("FFmpeg process error:", error);
+        reject(new Error("FFmpeg process failed"));
+      });
+    });
+  } catch (error) {
+    console.error("Failed to merge audio and video:", error);
+    throw new Error("Failed to merge audio and video");
+  }
+}
 async function showSourceSelectionDialog() {
   try {
     const sources = await desktopCapturer.getSources({
@@ -662,6 +717,17 @@ ipcMain.handle("recording.getMetadata", async (_, path2) => getRecordingMetadata
 ipcMain.handle("recording.convertWebmToMp4", async (_, params) => handleConvertWebmToMp4(params));
 ipcMain.handle("recording.getSources", async () => handleGetSources());
 ipcMain.handle("recording.showSourceDialog", async () => showSourceSelectionDialog());
+ipcMain.handle("recording.mergeAudioVideo", async (_, params) => handleMergeAudioVideo(params));
+ipcMain.handle("dialog.showSaveDialog", async (_, options) => {
+  const result = await dialog.showSaveDialog(options);
+  return result;
+});
+ipcMain.handle("file.copyFile", async (_, { sourcePath, destinationPath }) => {
+  const fs2 = await import("fs/promises");
+  const cleanSourcePath = sourcePath.startsWith("file://") ? sourcePath.slice(7) : sourcePath;
+  await fs2.copyFile(cleanSourcePath, destinationPath);
+  return { success: true };
+});
 async function getVideoMetadata(videoPath) {
   return new Promise((resolve, reject) => {
     const ffprobe = spawn("ffprobe", [

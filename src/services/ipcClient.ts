@@ -155,4 +155,37 @@ export const ipcClient = {
       throw new Error("Failed to show source dialog");
     }
   },
+
+  async mergeAudioVideo(params: {
+    videoPath: string;
+    audioPath: string;
+    outputFilename: string;
+  }): Promise<string> {
+    try {
+      const result = await window.api.invoke("recording.mergeAudioVideo", params);
+      return result;
+    } catch (error) {
+      console.error("Failed to merge audio and video:", error);
+      throw new Error("Failed to merge audio and video");
+    }
+  },
+
+  async showSaveDialog(options: any): Promise<{ canceled: boolean; filePath?: string }> {
+    try {
+      const result = await window.api.invoke("dialog.showSaveDialog", options);
+      return result;
+    } catch (error) {
+      console.error("Failed to show save dialog:", error);
+      throw new Error("Failed to show save dialog");
+    }
+  },
+
+  async copyFile(sourcePath: string, destinationPath: string): Promise<void> {
+    try {
+      await window.api.invoke("file.copyFile", { sourcePath, destinationPath });
+    } catch (error) {
+      console.error("Failed to copy file:", error);
+      throw new Error("Failed to copy file");
+    }
+  },
 };

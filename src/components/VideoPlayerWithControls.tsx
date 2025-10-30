@@ -67,6 +67,12 @@ export const VideoPlayerWithControls = forwardRef<VideoPlayerWithControlsRef, Vi
   const handleVideoLoad = () => {
     setIsLoading(false);
     setError("");
+    // Explicitly enable audio and set volume to maximum
+    if (videoRef.current) {
+      videoRef.current.muted = false;
+      videoRef.current.volume = 1.0;
+      console.log("VideoPlayerWithControls: Audio enabled, volume set to 1.0");
+    }
   };
 
   const handleVideoError = () => {

@@ -3,7 +3,7 @@ import { ipcRenderer, contextBridge, desktopCapturer } from "electron";
 // --------- Expose secure API to the Renderer process ---------
 contextBridge.exposeInMainWorld("api", {
   invoke: (channel: string, args?: any) => {
-    const validChannels = ["video.import", "video.clip", "video.export", "recording.getSources", "recording.showSourceDialog", "recording.saveFile", "recording.getMetadata", "recording.convertWebmToMp4"];
+    const validChannels = ["video.import", "video.clip", "video.export", "recording.getSources", "recording.showSourceDialog", "recording.saveFile", "recording.getMetadata", "recording.convertWebmToMp4", "recording.mergeAudioVideo", "dialog.showSaveDialog", "file.copyFile"];
     if (validChannels.includes(channel)) {
       return ipcRenderer.invoke(channel, args);
     }

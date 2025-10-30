@@ -13,6 +13,9 @@ Validate the basic flow of importing, trimming, and exporting videos using Elect
 1. **Import video** — open file picker and preview video
 2. **Select trim range** — specify start and end times
 3. **Export clip** — choose output folder, export at same or lower resolution
+4. **Screen recording** — record screen with microphone audio
+5. **Source selection** — choose screen/window to record
+6. **Audio merging** — combine screen video with microphone audio
 
 ## Tech Stack
 
@@ -30,13 +33,23 @@ Validate the basic flow of importing, trimming, and exporting videos using Elect
 - ✅ Project initialized with Electron + Vite template
 - ✅ TailwindCSS installed and ready for UI development
 - ✅ Epic 1 Complete: Secure Electron shell with IPC bridge
+- ✅ Epic 2 Complete: Frontend Interface (React + Zustand)
+- ✅ Epic 3 Complete: Real FFmpeg integration with video processing
+- ✅ Epic 4 Complete: UX/Progress & Packaging (Linux with bundled FFmpeg)
+- ✅ Epic 7 Complete: UI Enhancements (doubled video player, tabbed settings)
+- ✅ Epic 8 Complete: Data Structure Upgrade (two-track architecture)
+- ✅ Epic 9 Complete: Screen Recording & Camera Overlay System
+- ✅ Epic 10 Complete: Import Video Flow (Editor Core) with Welcome Screen
+- ✅ Epic 11 Complete: Screen-Only Recording Flow with Microphone Integration
 - ✅ Context isolation enabled, node integration disabled
 - ✅ Type-safe API interface available in renderer
 - ✅ Development server running with hot reload
-- 🚧 Ready for Epic 2: Frontend Interface (React + Zustand)
+- 🚧 Ready for Epic 12: Screen + Overlay Recording Flow
 
 ## Key Constraints
 
 - No complex editing features (timelines, projects, AI)
 - Focus on simple trim and export workflow
 - Must work with FFmpeg for video processing
+- Screen recording with microphone audio only (system audio unreliable)
+- Direct save workflow (no post-recording editor redirect)
