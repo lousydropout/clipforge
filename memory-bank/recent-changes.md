@@ -1,5 +1,51 @@
 # Recent Changes Summary
 
+## Epic 12: Screen + Overlay Recording Flow (Completed)
+
+### Picture-in-Picture (PiP) Merging System
+- **Dual Recording Architecture**: Implemented simultaneous screen and camera recording with separate MediaRecorder instances
+- **FFmpeg PiP Processing**: Added `handleMergePiP` IPC handler for creating Picture-in-Picture videos
+- **Smart Codec Selection**: Automatic codec selection based on user's chosen file format (WebM/VP9+Opus, MP4/H.264+AAC)
+- **Format Respect**: User's chosen file extension is preserved with appropriate codecs
+- **Direct Output**: PiP videos are created directly at user's chosen location (no intermediate files)
+
+### UI/UX Enhancements
+- **Screen Source Dropdown**: Replaced simple button with `ScreenSourceSelector` component showing available sources
+- **Camera Source Dropdown**: Created `CameraSelector` component for camera device selection
+- **Dual Preview Players**: Added separate preview areas for screen and camera feeds
+- **Export Location Integration**: Added `ExportLocationSelector` to "Dual Recording Setup" section
+- **Completion Status**: Added green "Recording Complete" status instead of automatic redirection
+- **No Workflow Redirection**: Users stay in Screen + Overlay workflow after completion
+
+### Technical Implementation
+- **React State Management**: Fixed timing issues with `useEffect` watching for both recordings completion
+- **FFmpeg Filter Complex**: Corrected syntax with proper output label `[v]` for overlay composition
+- **Audio Handling**: Implemented optional audio mapping (`-map 1:a?`) for graceful fallback
+- **File Path Processing**: Enhanced path handling for different file formats and protocols
+- **Error Handling**: Comprehensive logging and fallback to screen-only video if PiP merge fails
+
+### Key Components Created/Updated
+- **ScreenOverlayEditor**: Main component with dual recording and PiP merge logic
+- **CameraSelector**: New component for camera device selection
+- **ScreenSourceSelector**: Enhanced with better source enumeration
+- **ExportLocationSelector**: Integrated into dual recording setup
+- **VideoPlayerWithControls**: Updated to support dual preview players
+
+### Bug Fixes and Challenges
+- **Filter Complex Syntax**: Fixed missing `[v]` output label causing FFmpeg errors
+- **Codec Compatibility**: Resolved WebM/H.264 codec mismatch issues
+- **State Timing**: Fixed React state update timing with `useEffect` approach
+- **Format Mismatch**: Implemented smart codec selection based on file extension
+- **Audio Mapping**: Added optional audio mapping to prevent crashes when camera has no audio
+
+### Build Status
+- **TypeScript Compilation**: ✅ No errors
+- **FFmpeg Integration**: ✅ Proper PiP merging with correct filter syntax
+- **Format Support**: ✅ Both WebM and MP4 output formats working
+- **UI Components**: ✅ All new components integrated seamlessly
+- **State Management**: ✅ Proper React state handling with useEffect
+- **File Operations**: ✅ Direct output to user-chosen locations
+
 ## Epic 11: Screen-Only Recording Flow (Completed)
 
 ### Dual Recording Architecture

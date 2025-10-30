@@ -41,10 +41,11 @@ Validate the basic flow of importing, trimming, and exporting videos using Elect
 - ✅ Epic 9 Complete: Screen Recording & Camera Overlay System
 - ✅ Epic 10 Complete: Import Video Flow (Editor Core) with Welcome Screen
 - ✅ Epic 11 Complete: Screen-Only Recording Flow with Microphone Integration
+- ✅ Epic 12 Complete: Screen + Overlay Recording Flow with PiP Merging
 - ✅ Context isolation enabled, node integration disabled
 - ✅ Type-safe API interface available in renderer
 - ✅ Development server running with hot reload
-- 🚧 Ready for Epic 12: Screen + Overlay Recording Flow
+- 🚧 Ready for Epic 13: AI Auto-Muting (Filler-Word Removal)
 
 ## Key Constraints
 

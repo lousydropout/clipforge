@@ -2,7 +2,7 @@
 const electron = require("electron");
 electron.contextBridge.exposeInMainWorld("api", {
   invoke: (channel, args) => {
-    const validChannels = ["video.import", "video.clip", "video.export", "recording.getSources", "recording.showSourceDialog", "recording.saveFile", "recording.getMetadata", "recording.convertWebmToMp4", "recording.mergeAudioVideo", "dialog.showSaveDialog", "file.copyFile"];
+    const validChannels = ["video.import", "video.clip", "video.export", "recording.getSources", "recording.showSourceDialog", "recording.saveFile", "recording.getMetadata", "recording.convertWebmToMp4", "recording.mergeAudioVideo", "recording.mergePiP", "dialog.showSaveDialog", "file.copyFile"];
     if (validChannels.includes(channel)) {
       return electron.ipcRenderer.invoke(channel, args);
     }

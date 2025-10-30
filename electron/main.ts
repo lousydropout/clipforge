@@ -4,7 +4,7 @@ import path from "node:path";
 import { spawn } from "child_process";
 import { handleClipVideo } from "./ipcHandlers/clipVideo";
 import { handleExportVideo } from "./ipcHandlers/exportVideo";
-import { handleSaveFile, getRecordingMetadata, handleConvertWebmToMp4, handleGetSources, showSourceSelectionDialog, handleMergeAudioVideo } from "./ipcHandlers/recordingHandlers";
+import { handleSaveFile, getRecordingMetadata, handleConvertWebmToMp4, handleGetSources, showSourceSelectionDialog, handleMergeAudioVideo, handleMergePiP } from "./ipcHandlers/recordingHandlers";
 
 
 // --- existing code below this line stays unchanged ---
@@ -133,6 +133,7 @@ ipcMain.handle("recording.convertWebmToMp4", async (_, params) => handleConvertW
 ipcMain.handle("recording.getSources", async () => handleGetSources());
 ipcMain.handle("recording.showSourceDialog", async () => showSourceSelectionDialog());
 ipcMain.handle("recording.mergeAudioVideo", async (_, params) => handleMergeAudioVideo(params));
+ipcMain.handle("recording.mergePiP", async (_, params) => handleMergePiP(params));
 ipcMain.handle("dialog.showSaveDialog", async (_, options) => {
   const result = await dialog.showSaveDialog(options);
   return result;

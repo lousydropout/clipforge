@@ -4,6 +4,15 @@
 
 ### 2025-01-29
 
+- **Epic 12 Implementation**: Completed screen + overlay recording flow with Picture-in-Picture merging
+- **PiP Merging System**: Implemented FFmpeg-based Picture-in-Picture video creation with smart codec selection
+- **Dual Recording Architecture**: Enhanced with simultaneous screen and camera recording using separate MediaRecorder instances
+- **UI/UX Enhancements**: Added screen source dropdown, camera selector, dual preview players, and export location integration
+- **Format Respect**: User's chosen file format (WebM/MP4) is preserved with appropriate codecs
+- **Completion Status**: Added green "Recording Complete" status instead of automatic workflow redirection
+- **React State Management**: Fixed timing issues with useEffect approach for dual recording completion detection
+- **FFmpeg Filter Complex**: Corrected syntax with proper output label `[v]` for overlay composition
+- **Error Handling**: Comprehensive logging and fallback to screen-only video if PiP merge fails
 - **Epic 11 Implementation**: Completed screen-only recording flow with microphone integration
 - **Dual Recording Architecture**: Implemented separate screen video and microphone audio recording with FFmpeg merging
 - **Microphone Device Selection**: Added `MicrophoneSelector` component with device enumeration and permission handling
@@ -48,6 +57,7 @@
 - ✅ Epic 9 Complete: Screen Recording & Camera Overlay System
 - ✅ Epic 10 Complete: Import Video Flow (Editor Core) with Welcome Screen
 - ✅ Epic 11 Complete: Screen-Only Recording Flow with Microphone Integration
+- ✅ Epic 12 Complete: Screen + Overlay Recording Flow with PiP Merging
 - ✅ Context isolation enabled, node integration disabled
 - ✅ Type-safe API interface available in renderer
 - ✅ Real video metadata extraction using FFprobe
@@ -63,8 +73,12 @@
 - ✅ Microphone device selection and permission handling
 - ✅ Export location selection with native file dialog
 - ✅ Dual recording architecture with FFmpeg audio merging
+- ✅ Picture-in-Picture merging with FFmpeg filter complex
+- ✅ Smart codec selection based on user's chosen file format
+- ✅ Dual preview players for screen and camera feeds
+- ✅ Completion status without workflow redirection
 - ✅ Development server running with hot reload
-- 🚧 Ready for Epic 12: Screen + Overlay Recording Flow
+- 🚧 Ready for Epic 13: AI Auto-Muting (Filler-Word Removal)
 
 ## MVP Checklist
 
@@ -81,6 +95,10 @@
 - [x] Export location selection for recorded videos
 - [x] Audio/video merging with FFmpeg
 - [x] Two-track recording system (main + overlay)
+- [x] Picture-in-Picture merging with FFmpeg
+- [x] Dual recording (screen + camera) with separate previews
+- [x] Smart codec selection based on file format
+- [x] Completion status without workflow redirection
 
 ## Upcoming Epic Plans
 
@@ -139,17 +157,27 @@
 - [x] Implement direct save to user-chosen location
 - [x] Handle audio track merging with proper error handling
 
-### Epic 12: Screen + Overlay Recording Flow 📋 PLANNED
+### Epic 12: Screen + Overlay Recording Flow ✅ COMPLETED
 
-**Goal**: Record screen and webcam simultaneously, create PiP video, import to editor.
+**Goal**: Record screen and webcam simultaneously, create PiP video, stay in current workflow.
+
+**Epic 12 Completion Summary**:
+- **Dual Recording System**: Implemented simultaneous screen and camera recording with separate MediaRecorder instances
+- **Picture-in-Picture Merging**: Added FFmpeg-based PiP video creation with proper filter complex syntax
+- **Smart Codec Selection**: Automatic codec selection based on user's chosen file format (WebM/VP9+Opus, MP4/H.264+AAC)
+- **UI/UX Enhancements**: Added screen source dropdown, camera selector, dual preview players, and export location integration
+- **Format Respect**: User's chosen file extension is preserved with appropriate codecs
+- **Completion Status**: Added green "Recording Complete" status instead of automatic workflow redirection
+- **React State Management**: Fixed timing issues with useEffect approach for dual recording completion detection
+- **Error Handling**: Comprehensive logging and fallback to screen-only video if PiP merge fails
 
 **Tasks**:
-- [ ] Implement dual source setup (screen + camera)
-- [ ] Add live preview with webcam thumbnail overlay
-- [ ] Create dual recording logic (separate `MediaRecorder` streams)
-- [ ] Implement FFmpeg PiP merging post-processing
-- [ ] Add PiP size/position controls
-- [ ] Auto-redirect merged clip to editor
+- [x] Implement dual source setup (screen + camera)
+- [x] Add live preview with webcam thumbnail overlay
+- [x] Create dual recording logic (separate `MediaRecorder` streams)
+- [x] Implement FFmpeg PiP merging post-processing
+- [x] Add PiP size/position controls (fixed at bottom-right, 1/4 width)
+- [x] Show completion status without workflow redirection
 
 ### Epic 13: AI Auto-Muting (Filler-Word Removal) 📋 PLANNED
 
@@ -336,13 +364,13 @@ function fileUrlToPath(fileUrl: string): string {
 - **PreviewService**: Centralized stream management for live previews
 - **VideoPlayerWithControls**: Displays both recorded videos and live previews
 
-## Overall App Flow (Planned)
+## Overall App Flow (Current)
 
 ```
 Welcome Screen
  ├── Import Video  →  Epic 10 (Editor Core)
  ├── Screen Only   →  Epic 11  →  Direct Save to User Location
- └── Screen+Overlay→  Epic 12  →  Editor (Epic 10)
+ └── Screen+Overlay→  Epic 12  →  PiP Video + Completion Status
                                ↘ (optional) Epic 13 (AI Muting)
 ```
 
@@ -351,15 +379,13 @@ Welcome Screen
 ### What's Already Built ✅
 - **Epic 10 (Editor Core)**: 100% complete - has video import, preview, timeline, trim controls, speed/resolution adjustments, export
 - **Epic 11 (Screen Recording)**: 100% complete - has dual recording system with microphone audio and FFmpeg merging
-- **Epic 12 (Screen + Overlay)**: 60% complete - has two-track system, but needs PiP merging instead
+- **Epic 12 (Screen + Overlay)**: 100% complete - has PiP merging with FFmpeg, dual recording, and completion status
 
 ### What Needs to be Added/Modified 🔄
-- **Epic 12 PiP Merging**: Current two-track approach needs to change to PiP merging
 - **Epic 13 AI Muting**: Completely new feature
 
 ### Key Architectural Changes Needed
-1. **PiP Processing**: Replace two-track recording with FFmpeg PiP merging for Epic 12
-2. **AI Integration**: Add Whisper + GPT pipeline for Epic 13
+1. **AI Integration**: Add Whisper + GPT pipeline for Epic 13
 
 ## Development Environment
 

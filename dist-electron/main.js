@@ -587,6 +587,109 @@ async function handleMergeAudioVideo(params) {
     throw new Error("Failed to merge audio and video");
   }
 }
+async function handleMergePiP(params) {
+  try {
+    const { screenPath, cameraPath, outputPath } = params;
+    console.log("🎬 handleMergePiP called with params:", params);
+    console.log("📁 PiP merge paths:", { screenPath, cameraPath, outputPath });
+    console.log("🔍 Checking if input files exist...");
+    const fs2 = await import("fs");
+    const screenExists = fs2.existsSync(screenPath);
+    const cameraExists = fs2.existsSync(cameraPath);
+    console.log("📋 File existence check:", {
+      screenExists,
+      cameraExists,
+      screenPath,
+      cameraPath
+    });
+    if (!screenExists) {
+      throw new Error(`Screen recording file not found: ${screenPath}`);
+    }
+    if (!cameraExists) {
+      throw new Error(`Camera recording file not found: ${cameraPath}`);
+    }
+    const path2 = await import("path");
+    const outputExt = path2.extname(outputPath).toLowerCase();
+    const finalOutputPath = outputPath;
+    console.log("📁 Final output path:", finalOutputPath);
+    console.log("📁 Output format:", outputExt);
+    let videoCodec, audioCodec, pixelFormat;
+    if (outputExt === ".webm") {
+      videoCodec = "libvpx-vp9";
+      audioCodec = "libopus";
+      pixelFormat = "yuv420p";
+    } else {
+      videoCodec = "libx264";
+      audioCodec = "aac";
+      pixelFormat = "yuv420p";
+    }
+    console.log("🎥 Using codecs:", { videoCodec, audioCodec, pixelFormat });
+    const ffmpegArgs = [
+      "-y",
+      // Overwrite output file
+      "-i",
+      screenPath,
+      // Input screen video
+      "-i",
+      cameraPath,
+      // Input camera video (with audio)
+      "-filter_complex",
+      "[1:v]scale=iw/4:-1[cam];[0:v][cam]overlay=W-w-30:H-h-30[v]",
+      "-map",
+      "[v]",
+      // Use the composed video output
+      "-map",
+      "1:a?",
+      // Take audio from camera (optional, no crash if missing)
+      "-c:v",
+      videoCodec,
+      // Video codec based on output format
+      "-c:a",
+      audioCodec,
+      // Audio codec based on output format
+      "-pix_fmt",
+      pixelFormat,
+      // Pixel format for universal playback
+      "-shortest",
+      // End when shortest stream ends
+      finalOutputPath
+      // Output to user's chosen location
+    ];
+    console.log("🎥 Running FFmpeg command:", ["ffmpeg", ...ffmpegArgs].join(" "));
+    const ffmpeg = spawn("ffmpeg", ffmpegArgs);
+    return new Promise((resolve, reject) => {
+      let errorOutput = "";
+      let stdoutOutput = "";
+      ffmpeg.stdout.on("data", (data) => {
+        stdoutOutput += data.toString();
+        console.log("📺 FFmpeg stdout:", data.toString());
+      });
+      ffmpeg.stderr.on("data", (data) => {
+        errorOutput += data.toString();
+        console.log("⚠️ FFmpeg stderr:", data.toString());
+      });
+      ffmpeg.on("close", (code) => {
+        console.log("🔚 FFmpeg process closed with code:", code);
+        if (code === 0) {
+          console.log("✅ PiP video merged successfully:", finalOutputPath);
+          resolve(finalOutputPath);
+        } else {
+          console.error("❌ FFmpeg PiP merge failed with code:", code);
+          console.error("❌ Error output:", errorOutput);
+          console.error("❌ Stdout output:", stdoutOutput);
+          reject(new Error(`FFmpeg PiP merge failed: ${errorOutput}`));
+        }
+      });
+      ffmpeg.on("error", (error) => {
+        console.error("❌ FFmpeg process error:", error);
+        reject(new Error("FFmpeg process failed"));
+      });
+    });
+  } catch (error) {
+    console.error("Failed to merge PiP video:", error);
+    throw new Error("Failed to merge PiP video");
+  }
+}
 async function showSourceSelectionDialog() {
   try {
     const sources = await desktopCapturer.getSources({
@@ -718,6 +821,7 @@ ipcMain.handle("recording.convertWebmToMp4", async (_, params) => handleConvertW
 ipcMain.handle("recording.getSources", async () => handleGetSources());
 ipcMain.handle("recording.showSourceDialog", async () => showSourceSelectionDialog());
 ipcMain.handle("recording.mergeAudioVideo", async (_, params) => handleMergeAudioVideo(params));
+ipcMain.handle("recording.mergePiP", async (_, params) => handleMergePiP(params));
 ipcMain.handle("dialog.showSaveDialog", async (_, options) => {
   const result = await dialog.showSaveDialog(options);
   return result;

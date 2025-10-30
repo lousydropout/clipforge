@@ -188,4 +188,18 @@ export const ipcClient = {
       throw new Error("Failed to copy file");
     }
   },
+
+  async mergePiP(params: {
+    screenPath: string;
+    cameraPath: string;
+    outputPath: string;
+  }): Promise<string> {
+    try {
+      const result = await window.api.invoke("recording.mergePiP", params);
+      return result;
+    } catch (error) {
+      console.error("Failed to merge PiP video:", error);
+      throw new Error("Failed to merge PiP video");
+    }
+  },
 };
