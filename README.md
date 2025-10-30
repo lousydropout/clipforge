@@ -1,12 +1,42 @@
-# ClipForge - Professional Video Editor
+# ClipForge - AI-Powered Video Editor (That Was The Goal)
 
 ## Overview
 
-ClipForge is a professional desktop video editing application built with Electron, React, and FFmpeg. It features a modern dark theme interface with an interactive timeline, making it perfect for quick video trimming, speed adjustments, and professional-quality exports.
+ClipForge was designed to be an **AI-powered video editing app that removes your filler words**. Built with Electron, React, and FFmpeg, it features a modern dark theme interface with an interactive timeline. However, the AI feature is catastrophically broken and makes your videos worse instead of better.
+
+## 🚨 The AI Feature Disaster
+
+### What It Was Supposed To Do
+
+Automatically detect and mute filler words like "uh", "um", "like" in video audio to create cleaner, more professional content.
+
+### What It Actually Does
+
+Mutes important words, turning your audio into nonsensical gibberish! 🤡
+
+### The Silly Example
+
+**Original audio**: "Hey, I'm just here watching this YouTube video, give me a little, just saying a few words, and want to know how the AI will react."
+
+**What Whisper transcribes**: "Hey, I'm here watching this YouTube video, give me a little, saying a few words, and want to know how the AI will react." (Notice: "just" and "just" are missing - Whisper filtered them out!)
+
+**What GPT thinks are fillers**: "just", "little", "few" (because these words appear in the original but not in the cleaned text)
+
+**What gets muted**: The words "just", "little", "few" - turning your sentence into gibberish!
+
+**Result**: "Hey, I'm here watching this YouTube video, give me a , saying a words, and want to know how the AI will react." 🤡
+
+### Why It's Broken
+
+OpenAI Whisper ignores filler words during transcription, so GPT-4o-mini receives clean text and incorrectly identifies key words as "fillers". Classic case of "garbage in, garbage out"!
+
+## ⚠️ WARNING: DO NOT USE THE AI FEATURE
+
+The AI filler word removal feature is **DANGEROUS** and will make your videos worse. It mutes important words instead of filler words, creating nonsensical audio. Stick to the core video editing features only!
 
 ## Features
 
-### Core Functionality
+### ✅ Working Core Functionality
 
 - **Import Video** - Open file picker to select video files (MP4, AVI, MOV, MKV, WebM)
 - **Professional Video Player** - Large preview window with native HTML5 controls
@@ -14,6 +44,13 @@ ClipForge is a professional desktop video editing application built with Electro
 - **Speed Control** - Adjust playback speed from 0.5x to 2x (affects both preview and export)
 - **Resolution Scaling** - Export at custom resolutions (25% to 200% of original)
 - **Export Video** - Save trimmed clips with real-time progress tracking
+- **Screen Recording** - Record your screen with optional camera overlay
+- **Picture-in-Picture** - Overlay camera feed on screen recordings
+- **Audio Merging** - Combine screen and microphone audio
+
+### ❌ Broken AI Feature (DO NOT USE)
+
+- **AI Filler Word Removal** - Supposed to remove "uh", "um", "like" but actually removes important words, making your audio unintelligible
 
 ### User Experience
 
@@ -294,9 +331,21 @@ choco install ffmpeg
 - Verify output directory permissions
 - Ensure input file still exists and is accessible
 
+## 📚 Lessons Learned
+
+This project is a perfect example of why you should test AI features thoroughly before shipping. The AI doesn't just fail silently - it actively makes your content worse!
+
+**Key takeaways:**
+
+- Always understand API limitations before building features
+- Whisper is designed to produce clean transcripts and naturally removes disfluencies
+- "Garbage in, garbage out" applies especially to AI pipelines
+- Test with real-world data, not just perfect examples
+- Sometimes the simplest approach (manual editing) is better than AI
+
 ## Project Status
 
-### Completed Features ✅
+### ✅ Completed Working Features
 
 - [x] Import and preview video
 - [x] Professional dark theme interface
@@ -316,6 +365,13 @@ choco install ffmpeg
 - [x] Comprehensive error handling
 - [x] Performance optimizations
 - [x] Production build configuration
+- [x] Screen recording with camera overlay
+- [x] Picture-in-Picture functionality
+- [x] Audio merging capabilities
+
+### ❌ Catastrophically Broken Features
+
+- [x] AI Filler Word Removal - Mutes important words instead of filler words, creating nonsensical audio
 
 ---
 
