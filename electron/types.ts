@@ -4,6 +4,7 @@ export interface FFmpegOptions {
   startTime: number;
   endTime: number;
   scaleToHeight?: number;
+  scaleFactor?: number; // 0.25 to 1.0 for proportional scaling
   playbackSpeed?: number;
 }
 
@@ -13,6 +14,7 @@ export interface VideoClipParams {
   startTime: number;
   endTime: number;
   scaleToHeight?: number;
+  scaleFactor?: number; // 0.25 to 1.0 for proportional scaling
   playbackSpeed?: number;
 }
 
@@ -41,6 +43,7 @@ export interface ExportVideoRequest {
   startTime: number;
   endTime: number;
   scaleToHeight?: number;
+  scaleFactor?: number; // 0.25 to 1.0 for proportional scaling
   playbackSpeed?: number;
 }
 

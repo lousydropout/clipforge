@@ -41,6 +41,7 @@ export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
       startTime,
       endTime,
       scaleToHeight,
+      scaleFactor,
       playbackSpeed,
     } = options;
 
@@ -74,8 +75,12 @@ export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
     const videoFilters: string[] = [];
     const audioFilters: string[] = [];
 
-    // Scaling (ensure even width)
-    if (scaleToHeight) {
+    // Scaling (ensure even width and height)
+    if (scaleFactor && scaleFactor < 1.0) {
+      // Use scaleFactor for proportional scaling of both dimensions
+      videoFilters.push(`scale=trunc(iw*${scaleFactor}/2)*2:trunc(ih*${scaleFactor}/2)*2`);
+    } else if (scaleToHeight) {
+      // Fallback to legacy scaleToHeight behavior
       videoFilters.push(`scale=ceil(iw/2)*2:${scaleToHeight}`);
     }
 

@@ -14,6 +14,8 @@ import { ipcClient } from "../services/ipcClient";
 
 export interface VideoPlayerWithControlsRef {
   seekTo: (time: number) => void;
+  play: () => void;
+  pause: () => void;
   getCurrentTime: () => number;
 }
 
@@ -39,6 +41,18 @@ export const VideoPlayerWithControls = forwardRef<VideoPlayerWithControlsRef, Vi
     seekTo: (time: number) => {
       if (videoRef.current) {
         videoRef.current.currentTime = time;
+      }
+    },
+    play: () => {
+      if (videoRef.current) {
+        videoRef.current.play().catch((error) => {
+          console.error("Failed to play video:", error);
+        });
+      }
+    },
+    pause: () => {
+      if (videoRef.current) {
+        videoRef.current.pause();
       }
     },
     getCurrentTime: () => {

@@ -1,5 +1,88 @@
 # Recent Changes Summary
 
+## Epic 14: AI Short Suggestion Pipeline + Resolution Scaling (Completed)
+
+### AI Short Suggestion Pipeline
+- **Complete Pivot**: Successfully pivoted from broken AI filler word removal to AI short suggestion pipeline
+- **4-Step Process**: Extract Audio → Whisper Transcription → Segment Transcript → AI Short Suggestions
+- **Interactive Suggestions**: Click suggestions to seek video and auto-play segments with 0.5s buffer
+- **Color-Coded UI**: Green (75%+), Yellow (50-74%), Gray (<50%) based on suggestion quality
+- **Smart Features**: Hover tooltips for AI reasoning, auto-trim updates, batch processing for long videos
+- **Audio Preview**: HTML5 audio player for reviewing extracted audio
+- **Expandable UI**: Show/hide full transcript and paginated sentence lists
+
+### Resolution Scaling Feature
+- **Resolution Slider**: 25% to 100% scaling in Controls component with real-time dimension preview
+- **Proportional Scaling**: Fixed aspect ratio bug - both width and height now scale together
+- **FFmpeg Integration**: Uses `scale=trunc(iw*scaleFactor/2)*2:trunc(ih*scaleFactor/2)*2` filter
+- **File Size Optimization**: Reduces export sizes for social media while maintaining quality options
+- **Backward Compatibility**: Maintains existing `scaleToHeight` parameter as fallback
+
+### Technical Implementation
+- **New IPC Handlers**: `segmentTranscript` and `gptShortSuggestions` for AI processing
+- **State Management**: Added `exportResolutionScale` to project store with proper actions
+- **Data Structures**: `WhisperWord`, `SentenceSegment`, `ShortSuggestion` interfaces
+- **Error Handling**: Robust JSON parsing with regex extraction and comprehensive logging
+- **Video Integration**: Seamless video seeking and playback control with auto-pause
+
+### Key Components Updated
+- **AIProcessor**: Complete refactor for 4-step short suggestion pipeline
+- **ResolutionControls**: Added resolution slider with real-time preview
+- **ExportDialog**: Updated to use scaleFactor for proportional scaling
+- **Timeline**: Video seeking integration for interactive suggestions
+- **VideoPlayerWithControls**: Play/pause methods for auto-play functionality
+
+### Build Status
+- **TypeScript Compilation**: ✅ No errors
+- **Vite Build**: ✅ All modules transformed successfully
+- **Electron Builder**: ✅ AppImage package created
+- **Linting**: ✅ No linting errors detected
+- **Feature Testing**: ✅ All features working as expected
+
+## Epic 13: AI Auto-Muting (Filler-Word Removal) - **CATASTROPHICALLY BROKEN**
+
+### AI Pipeline Implementation
+- **Complete AI Pipeline**: Implemented Whisper + GPT-4o-mini + FFmpeg pipeline for filler word removal
+- **Text Alignment Algorithm**: Created local text alignment to identify deleted words by comparing original vs cleaned text
+- **Enhanced Logging**: Added detailed logging for debugging AI processing steps with word-level timestamps
+- **API Integration**: Added OpenAI SDK integration with environment variable support (`OPENAI_API_KEY`)
+- **UI Components**: Created AIProcessor component with 4-step tabbed interface and manual progression
+
+### Technical Implementation
+- **Audio Extraction**: FFmpeg-based audio extraction to 16kHz mono WAV for Whisper compatibility
+- **Whisper Integration**: OpenAI Whisper API with word-level timestamps using `verbose_json` format
+- **GPT Integration**: GPT-4o-mini for text cleaning with optimized prompts
+- **FFmpeg Muting**: Volume filter implementation for muting identified intervals
+- **IPC Handlers**: Added `aiHandlers.ts` with all AI processing functions
+- **Type Safety**: Full TypeScript support with proper OpenAI SDK integration
+
+### Why It's Catastrophically Broken
+- **Whisper Limitation**: OpenAI Whisper ignores filler words during transcription, filtering them out
+- **GPT Misidentification**: GPT receives clean text and incorrectly identifies key words as "fillers"
+- **Catastrophic Result**: Important words get muted instead of filler words, creating nonsensical audio
+- **Silly Example**: "just", "little", "few" get muted, turning "give me a little" into "give me a "
+
+### UI/UX Features
+- **4-Step Interface**: Extract Audio → Whisper Transcription → Detect Filler Words → Apply Muting
+- **Manual Progression**: Users can step through each stage manually with "Next" buttons
+- **Detailed Output**: Shows word-level timestamps, detected fillers, and FFmpeg commands
+- **Error Handling**: Comprehensive error messages and retry functionality
+- **Progress Tracking**: Visual indicators for each step status (pending, processing, complete, error)
+
+### Build Status
+- **TypeScript Compilation**: ✅ No errors
+- **OpenAI SDK Integration**: ✅ Proper API integration with environment variables
+- **FFmpeg Integration**: ✅ Audio extraction and muting functionality working
+- **UI Components**: ✅ AIProcessor component integrated into Timeline
+- **IPC Communication**: ✅ All AI handlers properly registered and whitelisted
+- **Enhanced Logging**: ✅ Detailed debugging output for troubleshooting
+
+### Lessons Learned
+- **API Limitations**: Always understand API limitations before building features
+- **Garbage In, Garbage Out**: Whisper's clean transcripts mislead GPT analysis
+- **Testing Importance**: Test AI features thoroughly with real-world data
+- **Alternative Approaches**: Consider audio-based detection instead of transcription-based
+
 ## Epic 12: Screen + Overlay Recording Flow (Completed)
 
 ### Picture-in-Picture (PiP) Merging System

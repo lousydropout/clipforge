@@ -5,11 +5,11 @@ import { spawn } from "child_process";
 import { handleClipVideo } from "./ipcHandlers/clipVideo";
 import { handleExportVideo } from "./ipcHandlers/exportVideo";
 import { handleSaveFile, getRecordingMetadata, handleConvertWebmToMp4, handleGetSources, showSourceSelectionDialog, handleMergeAudioVideo, handleMergePiP } from "./ipcHandlers/recordingHandlers";
-import { 
-  handleExtractAudio, 
-  handleWhisperTranscription, 
-  handleGPTFillerDetection, 
-  handleApplyMuting,
+import {
+  handleExtractAudio,
+  handleWhisperTranscription,
+  handleSegmentTranscript,
+  handleGPTShortSuggestions,
   handleCleanupTempFiles
 } from "./ipcHandlers/aiHandlers";
 
@@ -157,8 +157,8 @@ ipcMain.handle("file.copyFile", async (_, { sourcePath, destinationPath }) => {
 // AI Processing handlers
 ipcMain.handle("ai.extractAudio", async (_, params) => handleExtractAudio(params));
 ipcMain.handle("ai.whisperTranscription", async (_, params) => handleWhisperTranscription(params));
-ipcMain.handle("ai.gptFillerDetection", async (_, params) => handleGPTFillerDetection(params));
-ipcMain.handle("ai.applyMuting", async (_, params) => handleApplyMuting(params));
+ipcMain.handle("ai.segmentTranscript", async (_, params) => handleSegmentTranscript(params));
+ipcMain.handle("ai.gptShortSuggestions", async (_, params) => handleGPTShortSuggestions(params));
 ipcMain.handle("ai.cleanupTempFiles", async (_, params) => handleCleanupTempFiles(params));
 
 async function getVideoMetadata(videoPath: string): Promise<any> {

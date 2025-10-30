@@ -1,26 +1,42 @@
+import React, { useMemo } from "react";
 import { useProjectStore } from "../../store/useProjectStore";
 import { TimeRuler } from "./TimeRuler";
 import { VideoTrack } from "./VideoTrack";
 import { Playhead } from "./Playhead";
 import { TimelineControls } from "./TimelineControls";
 import { AIProcessor } from "../AIProcessor";
-import { useMemo } from "react";
-import { toast } from "sonner";
 
 interface TimelineProps {
   onSeek?: (time: number) => void;
+  videoPlayerRef?: React.RefObject<{
+    seekTo: (time: number) => void;
+    play: () => void;
+    pause: () => void;
+    getCurrentTime: () => number;
+  }>;
 }
 
-export function Timeline({ onSeek }: TimelineProps) {
-  const { project, timelineZoom, updateTrack } = useProjectStore();
+export function Timeline({ onSeek, videoPlayerRef }: TimelineProps) {
+  const { project, timelineZoom } = useProjectStore();
   const videoMetadata = project?.mainTrack?.metadata;
   
-  const handleAIComplete = (mutedVideoPath: string) => {
-    // Update main track with AI-processed video
-    updateTrack("main", {
-      aiMutedPath: mutedVideoPath
-    });
-    toast.success("AI-processed video ready! Use this version when exporting.");
+  const handleSeekVideo = (time: number, duration: number) => {
+    // Seek to the start time
+    if (videoPlayerRef?.current) {
+      videoPlayerRef.current.seekTo(time);
+      // Play the video
+      videoPlayerRef.current.play();
+      
+      // Auto-pause after the duration of the sentence
+      setTimeout(() => {
+        if (videoPlayerRef?.current) {
+          videoPlayerRef.current.pause();
+        }
+      }, duration * 1000); // Convert seconds to milliseconds
+    } else if (onSeek) {
+      // Fallback: just seek if video player ref not available
+      onSeek(time);
+    }
   };
 
   // Base pixels per second for 100% zoom (shows full video)
@@ -78,7 +94,7 @@ export function Timeline({ onSeek }: TimelineProps) {
         {project?.mainTrack?.path && (
           <AIProcessor 
             videoPath={project.mainTrack.path}
-            onProcessingComplete={handleAIComplete}
+            onSeekVideo={handleSeekVideo}
           />
         )}
       </div>

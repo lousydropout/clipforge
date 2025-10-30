@@ -39,6 +39,7 @@ interface ProjectStore {
   currentTime: number;
   timelineZoom: number;
   playbackSpeed: number;
+  exportResolutionScale: number;
 
   // Recording state
   isRecordingScreen: boolean;
@@ -56,6 +57,7 @@ interface ProjectStore {
   setCurrentTime: (time: number) => void;
   setTimelineZoom: (zoom: number) => void;
   setPlaybackSpeed: (speed: number) => void;
+  setExportResolutionScale: (scale: number) => void;
   setRecordingScreen: (recording: boolean) => void;
   setRecordingCamera: (recording: boolean) => void;
   setRecordingStartTime: (time: number | null) => void;
@@ -71,6 +73,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   currentTime: 0,
   timelineZoom: 1.0,
   playbackSpeed: 1.0,
+  exportResolutionScale: 1.0,
   isRecordingScreen: false,
   isRecordingCamera: false,
   recordingStartTime: null,
@@ -137,6 +140,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   setCurrentTime: (time) => set({ currentTime: time }),
   setTimelineZoom: (zoom) => set({ timelineZoom: zoom }),
   setPlaybackSpeed: (speed) => set({ playbackSpeed: speed }),
+  setExportResolutionScale: (scale) => set({ exportResolutionScale: scale }),
   setRecordingScreen: (recording) => set({ isRecordingScreen: recording }),
   setRecordingCamera: (recording) => set({ isRecordingCamera: recording }),
   setRecordingStartTime: (time) => set({ recordingStartTime: time }),
@@ -150,6 +154,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       currentTime: 0,
       timelineZoom: 1.0,
       playbackSpeed: 1.0,
+      exportResolutionScale: 1.0,
       isRecordingScreen: false,
       isRecordingCamera: false,
       recordingStartTime: null,

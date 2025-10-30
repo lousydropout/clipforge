@@ -14,6 +14,7 @@ export async function handleClipVideo(
       startTime,
       endTime,
       scaleToHeight,
+      scaleFactor,
       playbackSpeed,
     } = params;
 
@@ -40,6 +41,7 @@ export async function handleClipVideo(
       startTime,
       endTime,
       scaleToHeight,
+      scaleFactor,
       playbackSpeed,
     });
 

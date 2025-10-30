@@ -23,7 +23,7 @@ export async function handleExportVideo(
     console.log("Exporting video with params:", params);
     console.log("ExportVideo - playbackSpeed:", params.playbackSpeed);
 
-    const { inputPath, startTime, endTime, scaleToHeight, playbackSpeed } =
+    const { inputPath, startTime, endTime, scaleToHeight, scaleFactor, playbackSpeed } =
       params;
 
     // Convert file:// URL to regular file path
@@ -112,6 +112,7 @@ export async function handleExportVideo(
       startTime,
       endTime,
       scaleToHeight,
+      scaleFactor,
       playbackSpeed,
     });
 

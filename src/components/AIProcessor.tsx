@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { ipcClient } from "../services/ipcClient";
+import { useProjectStore } from "../store/useProjectStore";
 import {
   CheckCircle2,
   Circle,
@@ -14,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface AIProcessorProps {
   videoPath: string;
-  onProcessingComplete: (mutedVideoPath: string) => void;
+  onSeekVideo: (time: number, duration: number) => void;
 }
 
 type StepStatus = "pending" | "processing" | "complete" | "error";
@@ -28,8 +29,10 @@ interface StepData {
 
 export function AIProcessor({
   videoPath,
-  onProcessingComplete,
+  onSeekVideo,
 }: AIProcessorProps) {
+  const { } = useProjectStore();
+  
   const [currentStep, setCurrentStep] = useState(0);
   const [steps, setSteps] = useState<StepData[]>([
     { status: "pending" },
@@ -40,13 +43,14 @@ export function AIProcessor({
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [tempFiles, setTempFiles] = useState<string[]>([]);
-  const [mutedVideoPath, setMutedVideoPath] = useState<string | null>(null);
+  const [showFullTranscript, setShowFullTranscript] = useState(false);
+  const [showAllSentences, setShowAllSentences] = useState(false);
 
   const stepNames = [
     "Extract Audio",
-    "Whisper Transcription",
-    "Detect Filler Words",
-    "Apply Muting",
+    "Whisper Transcription", 
+    "Segment Transcript",
+    "AI Short Suggestions",
   ];
 
   const updateStep = (stepIndex: number, updates: Partial<StepData>) => {
@@ -100,7 +104,7 @@ export function AIProcessor({
             .slice(0, 5)
             .map(
               (w) =>
-                `"${w.text}" (${w.start.toFixed(2)}s - ${w.end.toFixed(2)}s)`
+                `"${w.word}" (${w.start.toFixed(2)}s - ${w.end.toFixed(2)}s)`
             )
             .join("\n");
 
@@ -128,37 +132,35 @@ ${
 
         case 2: {
           const transcription = steps[1].result;
-          if (!transcription) throw new Error("No transcription from step 2");
+          if (!transcription) throw new Error("No transcription from step 1");
 
-          const intervals = await ipcClient.gptFillerDetection({
-            text: transcription.text,
+          const sentences = await ipcClient.segmentTranscript({ 
             words: transcription.words,
+            fullText: transcription.text 
           });
+          
+          
           updateStep(2, {
             status: "complete",
-            output: `Found ${intervals.length} filler words:\n${intervals
-              .map((i) => `"${i.text}" at ${i.start.toFixed(1)}s`)
-              .join("\n")}`,
-            result: intervals,
+            output: `Segmented into ${sentences.length} sentences`,
+            result: sentences,
           });
           break;
         }
 
         case 3: {
-          const intervals = steps[2].result;
-          if (!intervals) throw new Error("No filler intervals from step 3");
+          const sentences = steps[2].result;
+          if (!sentences) throw new Error("No sentences from step 2");
 
-          const mutedPath = await ipcClient.applyMuting({
-            videoPath,
-            fillerIntervals: intervals,
-          });
-          setMutedVideoPath(mutedPath);
+          const suggestions = await ipcClient.gptShortSuggestions({ sentences });
+          
+          const highQualityCount = suggestions.filter(s => s.score >= 0.75).length;
+          
           updateStep(3, {
             status: "complete",
-            output: `Muted video created: ${mutedPath}`,
-            result: mutedPath,
+            output: `Found ${highQualityCount} high-quality short suggestions (score >= 0.75) out of ${suggestions.length} total suggestions`,
+            result: suggestions,
           });
-          onProcessingComplete(mutedPath);
           break;
         }
       }
@@ -183,15 +185,10 @@ ${
       { status: "pending" },
       { status: "pending" },
     ]);
-    setMutedVideoPath(null);
-
     // Cleanup temp files
     if (tempFiles.length > 0) {
       await ipcClient.cleanupTempFiles({ filePaths: tempFiles });
       setTempFiles([]);
-    }
-    if (mutedVideoPath) {
-      await ipcClient.cleanupTempFiles({ filePaths: [mutedVideoPath] });
     }
   };
 
@@ -223,11 +220,10 @@ ${
         {step.status === "pending" && (
           <div className="p-4 bg-gray-900 rounded border border-gray-700">
             <p className="text-gray-300 mb-4">
-              {stepIndex === 0 && "Extract audio from video for processing"}
-              {stepIndex === 1 && "Transcribe audio using OpenAI Whisper"}
-              {stepIndex === 2 && "Analyze transcript to identify filler words"}
-              {stepIndex === 3 &&
-                "Apply muting to detected filler word intervals"}
+              {stepIndex === 0 && "Extract audio track for transcription and analysis."}
+              {stepIndex === 1 && "Generate word-level transcript using Whisper."}
+              {stepIndex === 2 && "Group words into sentence-like segments using punctuation or pauses > 0.5s."}
+              {stepIndex === 3 && "Identify sentences that could make strong standalone short clips for social media."}
             </p>
             <Button
               onClick={() => handleStartStep(stepIndex)}
@@ -257,6 +253,128 @@ ${
           </div>
         )}
 
+        {/* Step 0: Audio Player */}
+        {stepIndex === 0 && step.status === "complete" && step.result && (
+          <div className="mt-4">
+            <h4 className="text-white font-medium mb-2">Audio Preview:</h4>
+            <audio 
+              controls 
+              className="w-full"
+              src={`file://${step.result}`}
+            >
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+        )}
+
+        {/* Step 1: Full Transcript Option */}
+        {stepIndex === 1 && step.status === "complete" && step.result && (
+          <div className="mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFullTranscript(!showFullTranscript)}
+            >
+              {showFullTranscript ? "Hide" : "Show"} Full Transcript
+            </Button>
+            {showFullTranscript && (
+              <div className="mt-2 p-3 bg-gray-900 rounded border border-gray-700 max-h-64 overflow-y-auto">
+                <p className="text-gray-300 text-sm whitespace-pre-wrap">
+                  {step.result.text}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Step 2: Sentences List */}
+        {stepIndex === 2 && step.status === "complete" && step.result && (
+          <div className="mt-4">
+            <h4 className="text-white font-medium mb-2">Sentences:</h4>
+            <div className="max-h-96 overflow-y-auto space-y-1">
+              {(step.result as Array<{ text: string; start: number; end: number }>)
+                .slice(0, showAllSentences ? undefined : 20)
+                .map((sentence, idx) => (
+                  <div key={idx} className="p-2 bg-gray-900 rounded border border-gray-700">
+                    <p className="text-sm text-gray-300">{sentence.text}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {sentence.start.toFixed(2)}s - {sentence.end.toFixed(2)}s
+                    </p>
+                  </div>
+                ))}
+            </div>
+            {(step.result as Array<any>).length > 20 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => setShowAllSentences(!showAllSentences)}
+              >
+                {showAllSentences ? "Show Less" : `Show All ${(step.result as Array<any>).length} Sentences`}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Step 4: Suggestions list */}
+        {stepIndex === 3 && step.status === "complete" && step.result && (
+          <div className="mt-4">
+            <h4 className="text-white font-medium mb-3">Suggested Shorts:</h4>
+            <div className="max-h-96 overflow-y-auto space-y-2">
+              {(step.result as Array<{ sentence: string; start: number; end: number; score: number; reason: string }>)
+                .map((suggestion, idx) => {
+                  const scoreColor = suggestion.score >= 0.75 
+                    ? "bg-green-900/20 border-green-700 text-green-300"
+                    : suggestion.score >= 0.5
+                    ? "bg-yellow-900/20 border-yellow-700 text-yellow-300"
+                    : "bg-gray-900/20 border-gray-700 text-gray-300";
+                  
+                  return (
+                    <div
+                      key={idx}
+                      className={`p-3 rounded border cursor-pointer hover:opacity-80 transition-opacity ${scoreColor}`}
+                      onClick={() => {
+                        const bufferTime = 0.5;
+                        const bufferedStart = Math.max(0, suggestion.start - bufferTime);
+                        const bufferedEnd = suggestion.end + bufferTime;
+                        const duration = bufferedEnd - bufferedStart;
+                        
+                        // Update trim range in store
+                        const { updateTrack } = useProjectStore.getState();
+                        updateTrack("main", {
+                          startTime: bufferedStart,
+                          endTime: bufferedEnd,
+                        });
+                        
+                        // Seek and play video
+                        onSeekVideo(bufferedStart, duration);
+                        
+                        // Show toast notification
+                        toast.success(`Trim range updated: ${bufferedStart.toFixed(2)}s - ${bufferedEnd.toFixed(2)}s`);
+                      }}
+                      title={suggestion.reason}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium mb-1">{suggestion.sentence}</p>
+                          <p className="text-xs opacity-75">
+                            {(suggestion.start - 0.5).toFixed(2)}s - {(suggestion.end + 0.5).toFixed(2)}s (with 0.5s buffer)
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold">
+                            {(suggestion.score * 100).toFixed(0)}%
+                          </span>
+                          {/* TODO: Add "Export Clip" button here */}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+
         {step.status === "error" && step.error && (
           <div className="p-4 bg-red-900/20 border border-red-700 rounded">
             <h4 className="text-red-300 font-medium mb-2">Error:</h4>
@@ -279,7 +397,7 @@ ${
     <div className="border-t border-gray-700 p-4 bg-gray-800">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-white">
-          AI Filler Word Removal
+          AI Short Suggestion
         </h2>
         {steps.every((s) => s.status === "pending") && (
           <Button onClick={handleReset} variant="outline">

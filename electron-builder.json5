@@ -3,7 +3,7 @@
   appId: "com.clipforge.app",
   productName: "ClipForge",
   copyright: "© 2025 ClipForge Project",
-  artifactName: "ClipForge-${version}-${os}-${arch}.${ext}",
+  artifactName: "clipforge-${version}.${ext}",
 
   // Syncs version automatically from package.json
   // (electron-builder does this automatically if not overridden)

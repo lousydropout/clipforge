@@ -2,7 +2,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface WelcomeScreenProps {
-  onNavigate: (workflow: 'import' | 'screen' | 'overlay') => void;
+  onNavigate: (workflow: "import" | "screen" | "overlay") => void;
 }
 
 export function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
@@ -12,7 +12,9 @@ export function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-white mb-4">ClipForge</h1>
-          <p className="text-xl text-gray-300 mb-2">Simple video editing and recording</p>
+          <p className="text-xl text-gray-300 mb-2">
+            Simple video editing and recording
+          </p>
           <p className="text-gray-400">Choose your workflow to get started</p>
         </div>
 
@@ -22,14 +24,17 @@ export function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
           <Card className="bg-gray-800 border-gray-700 hover:border-blue-500 transition-colors cursor-pointer group">
             <CardHeader className="text-center">
               <div className="text-6xl mb-4">📁</div>
-              <CardTitle className="text-2xl text-white">Import Video</CardTitle>
+              <CardTitle className="text-2xl text-white">
+                Import Video
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-center">
               <p className="text-gray-300 mb-6">
-                Edit an existing video file. Trim, adjust speed, change resolution, and export your clip.
+                Edit an existing video file. Trim, adjust speed, change
+                resolution, and export your clip.
               </p>
-              <Button 
-                onClick={() => onNavigate('import')}
+              <Button
+                onClick={() => onNavigate("import")}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 size="lg"
               >
@@ -42,14 +47,17 @@ export function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
           <Card className="bg-gray-800 border-gray-700 hover:border-green-500 transition-colors cursor-pointer group">
             <CardHeader className="text-center">
               <div className="text-6xl mb-4">🖥️</div>
-              <CardTitle className="text-2xl text-white">Screen Recording</CardTitle>
+              <CardTitle className="text-2xl text-white">
+                Screen Recording
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-center">
               <p className="text-gray-300 mb-6">
-                Record your screen with microphone audio. Perfect for tutorials, presentations, and demos.
+                Record your screen with microphone audio. Perfect for tutorials,
+                presentations, and demos.
               </p>
-              <Button 
-                onClick={() => onNavigate('screen')}
+              <Button
+                onClick={() => onNavigate("screen")}
                 className="w-full bg-green-600 hover:bg-green-700 text-white"
                 size="lg"
               >
@@ -62,14 +70,17 @@ export function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
           <Card className="bg-gray-800 border-gray-700 hover:border-purple-500 transition-colors cursor-pointer group">
             <CardHeader className="text-center">
               <div className="text-6xl mb-4">🎥</div>
-              <CardTitle className="text-2xl text-white">Screen + Overlay</CardTitle>
+              <CardTitle className="text-2xl text-white">
+                Screen + Overlay
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-center">
               <p className="text-gray-300 mb-6">
-                Record your screen and webcam simultaneously. Create picture-in-picture videos with ease.
+                Record your screen and webcam simultaneously. Create
+                picture-in-picture videos with ease.
               </p>
-              <Button 
-                onClick={() => onNavigate('overlay')}
+              <Button
+                onClick={() => onNavigate("overlay")}
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white"
                 size="lg"
               >
@@ -77,13 +88,6 @@ export function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
               </Button>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center mt-12">
-          <p className="text-gray-500 text-sm">
-            All processing happens locally on your device. No data is sent to external servers.
-          </p>
         </div>
       </div>
     </div>

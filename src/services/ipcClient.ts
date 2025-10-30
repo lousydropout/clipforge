@@ -27,6 +27,7 @@ export interface ExportVideoRequest {
   startTime: number;
   endTime: number;
   scaleToHeight?: number;
+  scaleFactor?: number; // 0.25 to 1.0 for proportional scaling
   playbackSpeed?: number;
 }
 
@@ -214,7 +215,7 @@ export const ipcClient = {
     }
   },
   
-  async whisperTranscription(params: { audioPath: string }): Promise<{ text: string; words: Array<{ start: number; end: number; text: string }> }> {
+  async whisperTranscription(params: { audioPath: string }): Promise<{ text: string; words: Array<{ start: number; end: number; word: string }> }> {
     try {
       const result = await window.api.invoke("ai.whisperTranscription", params);
       return result;
@@ -224,26 +225,28 @@ export const ipcClient = {
     }
   },
   
-  async gptFillerDetection(params: { 
-    text: string; 
-    words: Array<{ start: number; end: number; text: string }> 
-  }): Promise<Array<{ start: number; end: number; text: string }>> {
+  async segmentTranscript(params: {
+    words: Array<{ start: number; end: number; word: string }>;
+    fullText: string;
+  }): Promise<Array<{ text: string; start: number; end: number }>> {
     try {
-      const result = await window.api.invoke("ai.gptFillerDetection", params);
+      const result = await window.api.invoke("ai.segmentTranscript", params);
       return result;
     } catch (error) {
-      console.error("Failed to detect filler words:", error);
-      throw new Error("Failed to detect filler words");
+      console.error("Failed to segment transcript:", error);
+      throw new Error("Failed to segment transcript");
     }
   },
-  
-  async applyMuting(params: { videoPath: string; fillerIntervals: Array<{ start: number; end: number; text: string }> }): Promise<string> {
+
+  async gptShortSuggestions(params: {
+    sentences: Array<{ text: string; start: number; end: number }>;
+  }): Promise<Array<{ sentence: string; start: number; end: number; score: number; reason: string }>> {
     try {
-      const result = await window.api.invoke("ai.applyMuting", params);
+      const result = await window.api.invoke("ai.gptShortSuggestions", params);
       return result;
     } catch (error) {
-      console.error("Failed to apply muting:", error);
-      throw new Error("Failed to apply muting");
+      console.error("Failed to get short suggestions:", error);
+      throw new Error("Failed to get short suggestions");
     }
   },
   

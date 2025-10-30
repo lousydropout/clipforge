@@ -16,6 +16,7 @@ export function ExportDialog() {
   const setProcessing = useProjectStore((state) => state.setProcessing);
   const setProgress = useProjectStore((state) => state.setProgress);
   const playbackSpeed = useProjectStore((state) => state.playbackSpeed);
+  const exportResolutionScale = useProjectStore((state) => state.exportResolutionScale);
 
   const [exportStatus, setExportStatus] = useState<
     "idle" | "success" | "error"
@@ -58,15 +59,19 @@ export function ExportDialog() {
     setErrorMessage("");
 
     try {
-      // Get fresh value from store right before export
+      // Get fresh values from store right before export
       const currentSpeed = useProjectStore.getState().playbackSpeed;
+      const resolutionScale = useProjectStore.getState().exportResolutionScale;
+      
+      // Pass scaleFactor for proportional scaling
+      const scaleFactor = resolutionScale < 1.0 ? resolutionScale : undefined;
 
       const result = await ipcClient.exportVideo({
         inputPath: videoPath,
         startTime,
         endTime,
-        scaleToHeight: undefined,
-        playbackSpeed: currentSpeed, // Use fresh value from getState
+        scaleFactor,
+        playbackSpeed: currentSpeed,
       });
 
       if (result.success) {
@@ -117,7 +122,10 @@ export function ExportDialog() {
       <div className="text-sm text-gray-300">
         <p>Duration: {formatTime((endTime - startTime) / playbackSpeed)}</p>
         <p>
-          Resolution: {videoMetadata?.width} × {videoMetadata?.height}
+          Resolution: {Math.round((videoMetadata?.width || 0) * exportResolutionScale)} × {Math.round((videoMetadata?.height || 0) * exportResolutionScale)}
+          {exportResolutionScale < 1.0 && (
+            <span className="text-gray-400"> ({Math.round(exportResolutionScale * 100)}%)</span>
+          )}
         </p>
       </div>
 
