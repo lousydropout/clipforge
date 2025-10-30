@@ -5,6 +5,13 @@ import { spawn } from "child_process";
 import { handleClipVideo } from "./ipcHandlers/clipVideo";
 import { handleExportVideo } from "./ipcHandlers/exportVideo";
 import { handleSaveFile, getRecordingMetadata, handleConvertWebmToMp4, handleGetSources, showSourceSelectionDialog, handleMergeAudioVideo, handleMergePiP } from "./ipcHandlers/recordingHandlers";
+import { 
+  handleExtractAudio, 
+  handleWhisperTranscription, 
+  handleGPTFillerDetection, 
+  handleApplyMuting,
+  handleCleanupTempFiles
+} from "./ipcHandlers/aiHandlers";
 
 
 // --- existing code below this line stays unchanged ---
@@ -146,6 +153,13 @@ ipcMain.handle("file.copyFile", async (_, { sourcePath, destinationPath }) => {
   await fs.copyFile(cleanSourcePath, destinationPath);
   return { success: true };
 });
+
+// AI Processing handlers
+ipcMain.handle("ai.extractAudio", async (_, params) => handleExtractAudio(params));
+ipcMain.handle("ai.whisperTranscription", async (_, params) => handleWhisperTranscription(params));
+ipcMain.handle("ai.gptFillerDetection", async (_, params) => handleGPTFillerDetection(params));
+ipcMain.handle("ai.applyMuting", async (_, params) => handleApplyMuting(params));
+ipcMain.handle("ai.cleanupTempFiles", async (_, params) => handleCleanupTempFiles(params));
 
 async function getVideoMetadata(videoPath: string): Promise<any> {
   return new Promise((resolve, reject) => {

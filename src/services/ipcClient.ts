@@ -202,4 +202,56 @@ export const ipcClient = {
       throw new Error("Failed to merge PiP video");
     }
   },
+
+  // AI Processing methods
+  async extractAudio(params: { videoPath: string }): Promise<string> {
+    try {
+      const result = await window.api.invoke("ai.extractAudio", params);
+      return result;
+    } catch (error) {
+      console.error("Failed to extract audio:", error);
+      throw new Error("Failed to extract audio");
+    }
+  },
+  
+  async whisperTranscription(params: { audioPath: string }): Promise<{ text: string; words: Array<{ start: number; end: number; text: string }> }> {
+    try {
+      const result = await window.api.invoke("ai.whisperTranscription", params);
+      return result;
+    } catch (error) {
+      console.error("Failed to transcribe audio:", error);
+      throw new Error("Failed to transcribe audio");
+    }
+  },
+  
+  async gptFillerDetection(params: { 
+    text: string; 
+    words: Array<{ start: number; end: number; text: string }> 
+  }): Promise<Array<{ start: number; end: number; text: string }>> {
+    try {
+      const result = await window.api.invoke("ai.gptFillerDetection", params);
+      return result;
+    } catch (error) {
+      console.error("Failed to detect filler words:", error);
+      throw new Error("Failed to detect filler words");
+    }
+  },
+  
+  async applyMuting(params: { videoPath: string; fillerIntervals: Array<{ start: number; end: number; text: string }> }): Promise<string> {
+    try {
+      const result = await window.api.invoke("ai.applyMuting", params);
+      return result;
+    } catch (error) {
+      console.error("Failed to apply muting:", error);
+      throw new Error("Failed to apply muting");
+    }
+  },
+  
+  async cleanupTempFiles(params: { filePaths: string[] }): Promise<void> {
+    try {
+      await window.api.invoke("ai.cleanupTempFiles", params);
+    } catch (error) {
+      console.error("Failed to cleanup temp files:", error);
+    }
+  },
 };

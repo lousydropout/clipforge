@@ -3,15 +3,25 @@ import { TimeRuler } from "./TimeRuler";
 import { VideoTrack } from "./VideoTrack";
 import { Playhead } from "./Playhead";
 import { TimelineControls } from "./TimelineControls";
+import { AIProcessor } from "../AIProcessor";
 import { useMemo } from "react";
+import { toast } from "sonner";
 
 interface TimelineProps {
   onSeek?: (time: number) => void;
 }
 
 export function Timeline({ onSeek }: TimelineProps) {
-  const { project, timelineZoom } = useProjectStore();
+  const { project, timelineZoom, updateTrack } = useProjectStore();
   const videoMetadata = project?.mainTrack?.metadata;
+  
+  const handleAIComplete = (mutedVideoPath: string) => {
+    // Update main track with AI-processed video
+    updateTrack("main", {
+      aiMutedPath: mutedVideoPath
+    });
+    toast.success("AI-processed video ready! Use this version when exporting.");
+  };
 
   // Base pixels per second for 100% zoom (shows full video)
   // For a 1-minute video, this gives us about 1200px width at 100% zoom
@@ -63,6 +73,14 @@ export function Timeline({ onSeek }: TimelineProps) {
             onSeek={onSeek}
           />
         </div>
+        
+        {/* AI Processor Component */}
+        {project?.mainTrack?.path && (
+          <AIProcessor 
+            videoPath={project.mainTrack.path}
+            onProcessingComplete={handleAIComplete}
+          />
+        )}
       </div>
     </div>
   );
