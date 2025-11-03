@@ -1,4 +1,4 @@
-# Architecture - ClipForge Electron Prototype
+# Architecture - Screenshare Assist
 
 ## High-Level Architecture
 
@@ -24,7 +24,7 @@
 ## Directory Structure
 
 ```
-clipforge-electron/
+screenshare-assist/
 ├── electron/                    # Main process
 │   ├── main.ts                 # Electron entry point
 │   ├── preload.ts              # Secure IPC bridge

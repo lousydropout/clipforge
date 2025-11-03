@@ -158,7 +158,7 @@ ${
           
           updateStep(3, {
             status: "complete",
-            output: `Found ${highQualityCount} high-quality short suggestions (score >= 0.75) out of ${suggestions.length} total suggestions`,
+            output: `Found ${highQualityCount} high-quality short clips (score >= 0.75) out of ${suggestions.length} total clips`,
             result: suggestions,
           });
           break;
@@ -321,7 +321,7 @@ ${
           <div className="mt-4">
             <h4 className="text-white font-medium mb-3">Suggested Shorts:</h4>
             <div className="max-h-96 overflow-y-auto space-y-2">
-              {(step.result as Array<{ sentence: string; start: number; end: number; score: number; reason: string }>)
+              {(step.result as Array<{ clip: string[]; start: number; end: number; score: number; reason: string }>)
                 .map((suggestion, idx) => {
                   const scoreColor = suggestion.score >= 0.75 
                     ? "bg-green-900/20 border-green-700 text-green-300"
@@ -356,7 +356,7 @@ ${
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
-                          <p className="text-sm font-medium mb-1">{suggestion.sentence}</p>
+                          <p className="text-sm font-medium mb-1">"{suggestion.clip.join(' ')}"</p>
                           <p className="text-xs opacity-75">
                             {(suggestion.start - 0.5).toFixed(2)}s - {(suggestion.end + 0.5).toFixed(2)}s (with 0.5s buffer)
                           </p>

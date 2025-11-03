@@ -1,4 +1,4 @@
-# ClipForge Electron Prototype – Task Plan
+# Screenshare Assist – Task Plan
 
 ## Goal
 

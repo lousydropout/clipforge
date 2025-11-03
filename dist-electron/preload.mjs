@@ -1,1 +1,34 @@
-"use strict";const i=require("electron");i.contextBridge.exposeInMainWorld("api",{invoke:(e,r)=>{if(["video.import","video.clip","video.export","recording.getSources","recording.showSourceDialog","recording.saveFile","recording.getMetadata","recording.convertWebmToMp4","recording.mergeAudioVideo","recording.mergePiP","dialog.showSaveDialog","file.copyFile","ai.extractAudio","ai.whisperTranscription","ai.segmentTranscript","ai.gptShortSuggestions","ai.cleanupTempFiles"].includes(e))return i.ipcRenderer.invoke(e,r);throw new Error(`Invalid IPC channel: ${e}`)},on:(e,r)=>{["ffmpeg.progress"].includes(e)&&i.ipcRenderer.on(e,(t,n)=>r(n))},off:(e,r)=>{["ffmpeg.progress"].includes(e)&&i.ipcRenderer.off(e,r)},desktopCapturer:{getSources:e=>{try{return i.desktopCapturer.getSources(e)}catch(r){throw console.error("desktopCapturer.getSources failed:",r),r}}}});
+"use strict";
+const electron = require("electron");
+electron.contextBridge.exposeInMainWorld("api", {
+  invoke: (channel, args) => {
+    const validChannels = ["video.import", "video.clip", "video.export", "recording.getSources", "recording.showSourceDialog", "recording.saveFile", "recording.getMetadata", "recording.convertWebmToMp4", "recording.mergeAudioVideo", "recording.mergePiP", "dialog.showSaveDialog", "file.copyFile", "ai.extractAudio", "ai.whisperTranscription", "ai.segmentTranscript", "ai.gptShortSuggestions", "ai.cleanupTempFiles"];
+    if (validChannels.includes(channel)) {
+      return electron.ipcRenderer.invoke(channel, args);
+    }
+    throw new Error(`Invalid IPC channel: ${channel}`);
+  },
+  on: (channel, callback) => {
+    const validChannels = ["ffmpeg.progress"];
+    if (validChannels.includes(channel)) {
+      electron.ipcRenderer.on(channel, (_, data) => callback(data));
+    }
+  },
+  off: (channel, callback) => {
+    const validChannels = ["ffmpeg.progress"];
+    if (validChannels.includes(channel)) {
+      electron.ipcRenderer.off(channel, callback);
+    }
+  },
+  // Desktop capturer for screen recording
+  desktopCapturer: {
+    getSources: (options) => {
+      try {
+        return electron.desktopCapturer.getSources(options);
+      } catch (error) {
+        console.error("desktopCapturer.getSources failed:", error);
+        throw error;
+      }
+    }
+  }
+});

@@ -11,9 +11,11 @@ export function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-white mb-4">ClipForge</h1>
+          <h1 className="text-5xl font-bold text-white mb-4">
+            Screenshare Assist
+          </h1>
           <p className="text-xl text-gray-300 mb-2">
-            Simple video editing and recording
+            Simple screensharing with video editing and AI suggestions
           </p>
           <p className="text-gray-400">Choose your workflow to get started</p>
         </div>
@@ -31,7 +33,8 @@ export function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
             <CardContent className="text-center">
               <p className="text-gray-300 mb-6">
                 Edit an existing video file. Trim, adjust speed, change
-                resolution, and export your clip.
+                resolution, and export your clip. Use AI to help find potential
+                segments to export as shorts.
               </p>
               <Button
                 onClick={() => onNavigate("import")}

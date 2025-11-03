@@ -1,9 +1,9 @@
 {
   // ----- Basic Metadata -----
-  appId: "com.clipforge.app",
-  productName: "ClipForge",
-  copyright: "© 2025 ClipForge Project",
-  artifactName: "clipforge-${version}.${ext}",
+  appId: "com.screenshare-assist.app",
+  productName: "Screenshare Assist",
+  copyright: "© 2025 Screenshare Assist Project",
+  artifactName: "screenshare-assist-${version}.${ext}",
 
   // Syncs version automatically from package.json
   // (electron-builder does this automatically if not overridden)
@@ -32,10 +32,10 @@
     target: ["AppImage"],
     category: "Video",
     icon: "assets/icons/png/",
-    executableName: "clipforge",
+    executableName: "screenshare-assist",
     desktop: {
-      Name: "ClipForge",
-      Comment: "Simple video trimmer powered by FFmpeg"
+      Name: "Screenshare Assist",
+      Comment: "Simple screensharing app with video editing and AI short suggestions"
     }
   },
 
@@ -50,8 +50,8 @@
     allowToChangeInstallationDirectory: true,
     perMachine: false,
     createDesktopShortcut: true,
-    shortcutName: "ClipForge",
-    artifactName: "ClipForge-${version}-win-${arch}.${ext}"
+    shortcutName: "Screenshare Assist",
+    artifactName: "ScreenshareAssist-${version}-win-${arch}.${ext}"
   },
 
   // ----- Asar & Resource Handling -----

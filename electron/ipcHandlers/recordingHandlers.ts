@@ -24,7 +24,7 @@ export async function handleSaveFile(params: SaveRecordingRequest): Promise<Save
     const { buffer, filename } = params;
 
     // Create temp directory if it doesn't exist
-    const tempDir = join(tmpdir(), "clipforge-recordings");
+    const tempDir = join(tmpdir(), "screenshare-assist-recordings");
     await mkdir(tempDir, { recursive: true });
 
     // Generate unique filename
@@ -183,7 +183,7 @@ export async function handleConvertWebmToMp4(params: { webmPath: string; mp4File
     const { webmPath, mp4Filename } = params;
     
     // Create temp directory if it doesn't exist
-    const tempDir = join(tmpdir(), "clipforge-recordings");
+    const tempDir = join(tmpdir(), "screenshare-assist-recordings");
     await mkdir(tempDir, { recursive: true });
     
     const mp4Path = join(tempDir, mp4Filename);
@@ -262,7 +262,7 @@ export async function handleMergeAudioVideo(params: {
     const { videoPath, audioPath, outputFilename } = params;
     
     // Create output directory if it doesn't exist
-    const outputDir = join(tmpdir(), "clipforge-recordings");
+    const outputDir = join(tmpdir(), "screenshare-assist-recordings");
     await mkdir(outputDir, { recursive: true });
     const outputPath = join(outputDir, outputFilename);
 

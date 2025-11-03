@@ -240,7 +240,7 @@ export const ipcClient = {
 
   async gptShortSuggestions(params: {
     sentences: Array<{ text: string; start: number; end: number }>;
-  }): Promise<Array<{ sentence: string; start: number; end: number; score: number; reason: string }>> {
+  }): Promise<Array<{ clip: string[]; start: number; end: number; score: number; reason: string }>> {
     try {
       const result = await window.api.invoke("ai.gptShortSuggestions", params);
       return result;

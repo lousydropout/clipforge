@@ -1,8 +1,8 @@
-# Project Context - ClipForge Electron Prototype
+# Project Context - Screenshare Assist
 
 ## Project Overview
 
-ClipForge is a lightweight desktop video editing application built with Electron. This is the prototype version focused on validating core functionality rather than providing full editing capabilities.
+Screenshare Assist is a simple desktop application that lets users screenshare, with or without showing their face in a picture-in-picture overlay, with a simple video editor to trim, speed up/down, change resolution, and have AI help suggest potential shorts from segments of your video. Built with Electron.
 
 ## Core Mission
 

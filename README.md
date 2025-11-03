@@ -1,21 +1,22 @@
-# ClipForge - AI-Powered Short-Form Clip Editor
+# Screenshare Assist
 
 ## Overview
 
-ClipForge is a **desktop video editing application** designed to help content creators identify and extract engaging short-form clips from longer videos. Built with Electron, React, and FFmpeg, it uses AI to analyze your video transcripts and suggest the most clip-worthy moments for TikTok, YouTube Shorts, Instagram Reels, and similar platforms.
+Screenshare Assist is a **simple desktop application** that lets users screenshare, with or without showing their face in a picture-in-picture overlay. It includes a simple video editor to trim, speed up/down, change resolution, and has AI help to suggest potential shorts from segments of your video. Built with Electron, React, and FFmpeg.
 
 **Perfect for:**
 
-- Content creators who want to repurpose long-form content into shorts
-- Finding the best moments from podcast episodes, live streams, or tutorials
-- Quickly identifying viral-worthy segments from your content library
+- Creating screenshare recordings with optional face overlay
+- Editing and trimming your recordings
+- Adjusting playback speed and resolution
+- Getting AI suggestions for engaging short-form content from your videos
 
 **Workflow:**
 
-1. Import a longer video (1+ minutes)
-2. AI analyzes the transcript and suggests engaging 1-3 sentence clips
-3. Click suggestions to preview and automatically set trim points
-4. Edit, adjust speed/resolution, and export your short clips
+1. Record your screen (with or without camera overlay)
+2. Edit your recording: trim, adjust speed, change resolution
+3. Optionally use AI to analyze and suggest engaging short clips
+4. Export your final video
 
 ## Quick Start
 
@@ -52,7 +53,7 @@ ClipForge is a **desktop video editing application** designed to help content cr
 
 ### 🎯 AI-Powered Short Detection (Primary Feature)
 
-**AI Short Suggestions** - The core feature that makes ClipForge unique:
+**AI Short Suggestions** - AI-powered feature for identifying engaging moments:
 
 - **Smart Analysis**: Uses OpenAI Whisper for word-level transcription with precise timestamps
 - **Engagement Scoring**: GPT-4.1-mini analyzes your transcript to identify 1-3 sentence clips with the most potential for short-form content
@@ -143,7 +144,7 @@ export OPENAI_API_KEY="your-api-key-here"
 
 ```
 
-clipforge-electron/
+screenshare-assist/
 ├── electron/
 │   ├── main.ts              # Electron entry point
 │   ├── preload.ts           # Secure IPC bridge
@@ -381,9 +382,9 @@ bun run dist
 
 The build process creates the following artifacts in the `dist/` directory:
 
-- **Linux**: `clipforge-0.2.0-linux-x64.AppImage` and `clipforge-0.2.0-linux-x64.deb`
-- **Windows**: `clipforge-0.2.0-win-x64.exe` (NSIS installer) and `clipforge-0.2.0-win-x64-portable.exe`
-- **macOS**: `clipforge-0.2.0-mac-x64.dmg`
+- **Linux**: `screenshare-assist-0.2.0-linux-x64.AppImage` and `screenshare-assist-0.2.0-linux-x64.deb`
+- **Windows**: `screenshare-assist-0.2.0-win-x64.exe` (NSIS installer) and `screenshare-assist-0.2.0-win-x64-portable.exe`
+- **macOS**: `screenshare-assist-0.2.0-mac-x64.dmg`
 
 #### FFmpeg Bundling
 
@@ -400,8 +401,8 @@ The application includes bundled FFmpeg binaries for Linux, eliminating the need
 
 The build process is configured in `electron-builder.json5`:
 
-- **App ID**: `com.clipforge.app`
-- **Product Name**: `ClipForge`
+- **App ID**: `com.screenshare-assist.app`
+- **Product Name**: `Screenshare Assist`
 - **Icons**: Multiple sizes (16x16 to 512x512) in `assets/icons/png/`
 - **Output Directory**: `dist/`
 - **Extra Resources**: FFmpeg binaries in `bin/linux/`
@@ -451,7 +452,7 @@ choco install ffmpeg
 
 ## 📚 How We Pivoted (Lessons Learned)
 
-ClipForge started with a different goal: automatically removing filler words like "uh" and "um" from videos. That feature failed spectacularly, but we learned valuable lessons that led to the successful AI Short Suggestions feature.
+Screenshare Assist started with a different goal: automatically removing filler words like "uh" and "um" from videos. That feature failed spectacularly, but we learned valuable lessons that led to the successful AI Short Suggestions feature.
 
 **The Original Plan (Why It Failed):**
 
@@ -510,4 +511,4 @@ The app originally attempted to build an "AI Filler Word Removal" feature, but i
 
 ## License
 
-MIT License © 2025 ClipForge Project
+MIT License © 2025 Screenshare Assist Project

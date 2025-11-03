@@ -2,7 +2,7 @@
 
 ## Overview
 
-Add screen and camera recording capabilities to ClipForge, enabling users to record directly into the two-track system. Users can choose to record screen only, camera only, or both simultaneously via a dropdown menu in the header.
+Add screen and camera recording capabilities to Screenshare Assist, enabling users to record directly into the two-track system. Users can choose to record screen only, camera only, or both simultaneously via a dropdown menu in the header.
 
 ## Key Files to Create
 

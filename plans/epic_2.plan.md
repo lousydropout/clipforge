@@ -73,7 +73,7 @@ Update `src/App.tsx`:
 
 - Remove test/demo code
 - Clean, modern layout with TailwindCSS
-- Header with app title "ClipForge"
+- Header with app title "Screenshare Assist"
 - Import button (calls `importVideo()`)
 - VideoPlayer component
 - TrimControls component (only visible when video loaded)

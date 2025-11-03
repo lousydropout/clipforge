@@ -1,4 +1,4 @@
-# API Reference - ClipForge Electron Prototype
+# API Reference - Screenshare Assist
 
 ## IPC Events
 

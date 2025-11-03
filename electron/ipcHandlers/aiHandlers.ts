@@ -28,7 +28,7 @@ interface SentenceSegment {
 }
 
 interface ShortSuggestion {
-  sentence: string;
+  clip: string[];
   start: number;
   end: number;
   score: number;
@@ -501,28 +501,31 @@ export async function handleSegmentTranscript(params: {
   // Split the full text into sentences using punctuation
   const sentenceTexts = fullText
     .split(/[.!?]+/)
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
 
-  console.log(`🔍 Found ${sentenceTexts.length} sentences in full text:`, sentenceTexts);
+  console.log(
+    `🔍 Found ${sentenceTexts.length} sentences in full text:`,
+    sentenceTexts
+  );
 
   // Map each sentence text to word timestamps
   let wordIndex = 0;
-  
+
   for (const sentenceText of sentenceTexts) {
     const sentenceWords: WhisperWord[] = [];
     const sentenceStart = wordIndex < words.length ? words[wordIndex].start : 0;
-    
+
     // Find words that match this sentence
     const wordsToMatch = sentenceText.toLowerCase().split(/\s+/);
     let matchedWords = 0;
     let tempWordIndex = wordIndex; // Use temporary index to avoid skipping words
-    
+
     while (tempWordIndex < words.length && matchedWords < wordsToMatch.length) {
       const word = words[tempWordIndex];
-      const wordText = word.word.toLowerCase().replace(/[^\w]/g, ''); // Remove punctuation for matching
-      const targetWord = wordsToMatch[matchedWords].replace(/[^\w]/g, '');
-      
+      const wordText = word.word.toLowerCase().replace(/[^\w]/g, ""); // Remove punctuation for matching
+      const targetWord = wordsToMatch[matchedWords].replace(/[^\w]/g, "");
+
       if (wordText === targetWord) {
         sentenceWords.push(word);
         matchedWords++;
@@ -530,7 +533,7 @@ export async function handleSegmentTranscript(params: {
       }
       tempWordIndex++; // Always advance tempWordIndex to search through all words
     }
-    
+
     if (sentenceWords.length > 0) {
       const sentenceEnd = sentenceWords[sentenceWords.length - 1].end;
       sentences.push({
@@ -563,15 +566,29 @@ export async function handleGPTShortSuggestions(params: {
 
   const response = await openai.chat.completions.create({
     model: "gpt-4.1-mini",
-    temperature: 0,
+    temperature: 1,
     messages: [
       {
         role: "system",
-        content: `You are analyzing sentences from a video transcript.
-Rate how well each sentence stands alone as a short clip for social media.
-Only output valid JSON with this exact schema:
-[{"id": 0, "sentence": "...", "score": 0.0-1.0, "reason": "..."}]
-Do not include any commentary or explanations outside the JSON.`,
+        content: `You are a creative video editor selecting moments for short-form clips (TikTok, YouTube Shorts, etc.).
+Given a transcript broken into sentences, identify clips of 1–3 consecutive sentences that would make engaging short-form moments (under ~30s).
+
+A good short has one or more of these:
+- Scene energy (vivid sense of place/time/action)
+- Personality or humor
+- Standalone clarity
+
+Prefer small story-like moments over isolated statements. Return **only valid JSON**, with this schema:
+[
+  {"clip": ["sentence1", "sentence2", "..."], "score": 0.0-1.0, "reason": "why it works"}
+]
+Avoid commentary outside JSON.
+
+Notes:
+1. The suggested clips can overlap with each other, but should not be the same clip.
+2. Include in your response all clips with a score of 0.4 or higher.
+
+`,
       },
       { role: "user", content: prompt },
     ],
@@ -581,8 +598,7 @@ Do not include any commentary or explanations outside the JSON.`,
 
   // Safe JSON parsing with regex extraction
   let parsed: Array<{
-    id: number;
-    sentence: string;
+    clip: string[];
     score: number;
     reason: string;
   }> = [];
@@ -601,12 +617,16 @@ Do not include any commentary or explanations outside the JSON.`,
   // Merge parsed data with original timestamps
   const suggestions: ShortSuggestion[] = parsed
     .map((item) => {
-      const ref = input[item.id];
-      if (!ref) return null;
+      const first = item.clip[0];
+      const last = item.clip[item.clip.length - 1];
+      const firstSentence = input.find((s) => s.text === first);
+      const lastSentence = input.find((s) => s.text === last);
+      const start = firstSentence?.start ?? 0;
+      const end = lastSentence?.end ?? 0;
       return {
-        sentence: item.sentence || ref.text,
-        start: ref.start,
-        end: ref.end,
+        clip: item.clip,
+        start,
+        end,
         score: Math.min(Math.max(item.score ?? 0, 0), 1),
         reason: item.reason || "",
       };
@@ -634,10 +654,21 @@ export async function processBatch(
     messages: [
       {
         role: "system",
-        content: `You are analyzing sentences from a video transcript. 
-Mark which sentences are self-contained, emotionally engaging, or insightful enough to stand alone as short clips for social media.
-Return structured JSON: [{"sentence": "...", "score": 0.0-1.0, "reason": "..."}].
-Only score sentences in the provided list.`,
+        content: `You are a creative video editor selecting moments for short-form clips (TikTok, YouTube Shorts, etc.).
+Given a transcript broken into sentences, identify ~3 consecutive sentences that would make engaging short-form moments.
+
+A good short has one or more of these:
+- Scene energy (vivid sense of place/time/action)
+- Setup + payoff (tension, surprise, reversal)
+- Personality or humor
+- Standalone clarity
+- Punchy pacing (under ~15s)
+
+Prefer small story-like moments over isolated statements. Return **only valid JSON**, with this schema:
+[
+  {"clip": ["sentence1", "sentence2", "..."], "score": 0.0-1.0, "reason": "why it works"}
+]
+Avoid commentary outside JSON.`,
       },
       { role: "user", content: prompt },
     ],
@@ -646,7 +677,7 @@ Only score sentences in the provided list.`,
   const responseText = response.choices[0].message.content?.trim() || "";
 
   // Safe JSON parsing with regex extraction
-  let parsed: Array<{ sentence: string; score: number; reason: string }> = [];
+  let parsed: Array<{ clip: string[]; score: number; reason: string }> = [];
   try {
     const match = responseText.match(/\[.*\]/s);
     if (match) {
@@ -667,17 +698,22 @@ Only score sentences in the provided list.`,
   // Merge parsed suggestions with timestamp data from input sentences
   const suggestions: ShortSuggestion[] = [];
   for (const parsedItem of parsed) {
-    // Find matching sentence by text
-    const matchingSentence = sentences.find(
-      (s) =>
-        s.text.trim().toLowerCase() === parsedItem.sentence.trim().toLowerCase()
+    const first = parsedItem.clip[0];
+    const last = parsedItem.clip[parsedItem.clip.length - 1];
+
+    // Find matching sentences by text
+    const firstSentence = sentences.find(
+      (s) => s.text.trim().toLowerCase() === first.trim().toLowerCase()
+    );
+    const lastSentence = sentences.find(
+      (s) => s.text.trim().toLowerCase() === last.trim().toLowerCase()
     );
 
-    if (matchingSentence) {
+    if (firstSentence && lastSentence) {
       suggestions.push({
-        sentence: parsedItem.sentence,
-        start: matchingSentence.start,
-        end: matchingSentence.end,
+        clip: parsedItem.clip,
+        start: firstSentence.start,
+        end: lastSentence.end,
         score: parsedItem.score,
         reason: parsedItem.reason,
       });

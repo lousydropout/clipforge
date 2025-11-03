@@ -1,11 +1,11 @@
 {
-  "name": "clipforge",
-  "description": "A lightweight desktop video editing application for trimming and exporting video clips",
+  "name": "screenshare-assist",
+  "description": "A simple app that lets users screenshare, with or without showing their face in a picture-in-picture overlay, with a simple video editor to trim, speed up/down, down resolution, and have an AI help suggest potential shorts from segments of your video",
   "author": {
     "name": "Vincent Chan",
     "email": "lousydropout@gmail.com"
   },
-  "homepage": "https://github.com/lousydropout/clipforge",
+  "homepage": "https://github.com/lousydropout/screenshare-assist",
   "private": true,
   "version": "0.2.0",
   "type": "module",

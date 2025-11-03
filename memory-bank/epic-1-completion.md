@@ -2,7 +2,7 @@
 
 ## Overview
 
-Epic 1 has been successfully completed, establishing a secure Electron shell with proper IPC communication for the ClipForge video editing prototype.
+Epic 1 has been successfully completed, establishing a secure Electron shell with proper IPC communication for the Screenshare Assist video editing prototype.
 
 ## Completed Tasks
 

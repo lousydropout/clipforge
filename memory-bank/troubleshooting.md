@@ -1,4 +1,4 @@
-# Troubleshooting - ClipForge Electron Prototype
+# Troubleshooting - Screenshare Assist
 
 ## Common Issues
 

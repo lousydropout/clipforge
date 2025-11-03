@@ -2,7 +2,7 @@
 
 ## Overview
 
-Epic 2 has been successfully completed, implementing a complete React frontend with Zustand state management, video player, trim controls, and export dialog for the ClipForge video editing prototype.
+Epic 2 has been successfully completed, implementing a complete React frontend with Zustand state management, video player, trim controls, and export dialog for the Screenshare Assist video editing prototype.
 
 ## Completed Tasks
 
@@ -11,7 +11,7 @@ Epic 2 has been successfully completed, implementing a complete React frontend w
 - **File**: `src/App.tsx`
 - **Changes**:
   - Clean, modern layout with TailwindCSS
-  - Header with app title "ClipForge"
+  - Header with app title "Screenshare Assist"
   - Import button with loading states
   - Conditional component rendering
   - Welcome screen for new users

@@ -2,7 +2,7 @@
 
 ## Goal
 
-Create a production-ready Linux build of ClipForge with bundled FFmpeg binaries, application icons, and verified build configuration.
+Create a production-ready Linux build of Screenshare Assist with bundled FFmpeg binaries, application icons, and verified build configuration.
 
 ## Implementation Steps
 

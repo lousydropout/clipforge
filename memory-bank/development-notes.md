@@ -1,4 +1,4 @@
-# Development Notes - ClipForge Electron Prototype
+# Development Notes - Screenshare Assist
 
 ## Recent Changes
 
@@ -384,7 +384,7 @@ function fileUrlToPath(fileUrl: string): string {
 - **Recording**: WebM files (faster, more responsive)
 - **Merging**: FFmpeg combines screen video and microphone audio into single WebM
 - **Export**: Direct save to user-chosen location (no MP4 conversion)
-- **Storage**: `/tmp/clipforge-recordings/` for temporary files, user location for final output
+- **Storage**: `/tmp/screenshare-assist-recordings/` for temporary files, user location for final output
 
 ### UI Components
 - **ScreenSourceSelector**: Dropdown for choosing screen/window source
